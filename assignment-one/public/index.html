@@ -1,0 +1,51 @@
+<script type="module">
+    import { createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js'
+
+    createApp({
+        data() {
+            return {
+                randMin: 1,
+                randMax: 10,
+                random: -1,
+                history: []
+            }
+        },
+        methods: {
+            GetRand: getRandom
+        }
+    }).mount('#app')
+
+    function getRandom() {
+		console.log("getRandom called")
+		let prom = fetch("random/"+this.randMin+"/"+this.randMax)
+		prom.then( response => response.json())
+			.then (response => { 
+				this.random = response.result
+				this.history.push(response.result)
+			}
+	)}
+</script>
+
+<div id="app">
+    <h1> Welcome to the Random Number Generator </h1>
+	
+	Please enter a minimum and a maximum as the range of the Random Number
+	<br>
+
+	Minimum: <input v-model="randMin">
+	Maximum: <input v-model="randMax">
+	<br>
+	<br>
+
+	<button v-on:click="GetRand">Generate Random Number</button> between {{randMin}} and {{randMax}}
+	<br>
+	Latest Random Number is {{random}}
+
+	<span v-if="history.length > 0">
+		<hr>
+		<h1>History of numbers generates</h1>
+		<ul>
+			<li v-for="num in history">{{num}}</li>
+		</ul>
+	</span>
+</div>

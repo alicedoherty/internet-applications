@@ -3,17 +3,26 @@
 "use strict";
 
 const express = require('express')
-const https = require('https')
-
 const app = express()
-const port = 4000
+const port = 3000
 
-app.get('/', (req, res) => {
-    res.render('index', {data: ''})
-}
+const path = require("path")
+let publicPath= path.resolve(__dirname,"public") 
+app.use(express.static(publicPath))
 
-app.get('https://api.openweathermap.org/data/2.5/weather?lat=53.12&lon=52.12&appid=4fda716a357f34ff51ad31191ff68603', (req, res) =>
-    res.send('temp')
-)
+app.get('/random/:min/:max', sendRandom)
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+
+function sendRandom(req, res) {
+	let min = parseInt(req.params.min);
+	let max = parseInt(req.params.max);
+	if (isNaN(min) || isNaN(max)) {
+		res.status(400);
+		res.json( {error : "Bad Request."});
+		return;
+	}
+	let result = Math.round( (Math.random() * (max - min)) + min); 
+	// Return result is a JSON object
+	res.json( { result : result });
+}
