@@ -12,23 +12,29 @@ app.use(express.static(publicPath));
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));
 
-app.get("/weather/:lat/:lon", sendWeatherData);
+app.get("/weather/:city", sendWeatherData);
+// app.get("/weather/:lat/:lon", sendWeatherData);
 
 function sendWeatherData(req, res) {
-  let lat = parseFloat(req.params.lat);
-  let lon = parseFloat(req.params.lon);
+  let city = req.params.city;
+  // let lat = parseFloat(req.params.lat);
+  // let lon = parseFloat(req.params.lon);
 
   // Add to a private files
   let apiKey = "4fda716a357f34ff51ad31191ff68603";
+  // let url =
+  //   "https://api.openweathermap.org/data/2.5/forecast?lat=" +
+  //   lat +
+  //   "&lon=" +
+  //   lon +
+  //   "&appid=" +
+  //   apiKey;
   let url =
-    "https://api.openweathermap.org/data/2.5/forecast?lat=" +
-    lat +
-    "&lon=" +
-    lon +
+    "https://api.openweathermap.org/data/2.5/forecast?q=" +
+    city +
     "&appid=" +
-    apiKey;
-
-  console.log(lat, lon);
+    apiKey +
+    "&units=metric";
   console.log(url);
 
   https.get(url, (response) => {

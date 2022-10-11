@@ -1,14 +1,14 @@
 <script type="module">
+	// Add to separate .vue file
     import { createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js'
 
     createApp({
         data() {
             return {
-                cityName: "",
-				longitude: 0.00,
-				latitude: 0.00,
-				weather: {},
-				count: 0
+                city: "",
+				// longitude: 0.00,
+				// latitude: 0.00,
+				weather: {}
             }
         },
         methods: {
@@ -16,18 +16,9 @@
         }
     }).mount('#app')
 
-    // function getRandom() {
-	// 	console.log("getRandom called")
-	// 	let prom = fetch("random/"+this.randMin+"/"+this.randMax)
-	// 	prom.then( response => response.json())
-	// 		.then (response => { 
-	// 			this.random = response.result
-	// 			this.history.push(response.result)
-	// 		}
-	// )}
 	function getWeather() {
 		console.log("getWeather called")
-		let promise = fetch("weather/" + this.latitude + "/" + this.longitude)
+		let promise = fetch("weather/" + this.city)
 		promise.then( response => response.json())
 			.then (response => { 
 				this.weather = response
@@ -40,22 +31,19 @@
 	<h1>Weather App</h1>
 
 	<label>City Name</label>
-	<input type="text" v-model="cityName">
-	<br>
-
-	<label>Longitude</label>
-	<input type="number" step="0.01" v-model="longitude">
-	<br>
-
-	<label>Latitude</label>
-	<input type="number" step="0.01" v-model="latitude">
+	<input type="text" v-model="city">
 	<br>
 	
 	<button v-on:click="GetWeather">Get Weather</button>
 
-	<p>Inputted city: {{cityName}}</p>
-	<p>Inputted longitude: {{longitude}}</p>
-	<p>Inputted latitude: {{latitude}}</p>
-
-	<p>Weather: {{weather}}</p>
+	<h2>{{city}} Weather</h2>
+	<ul>
+		<li v-for="item in weather.list">
+			Day/Time: {{item.dt_txt}}
+			<br>
+			Temperature: {{item.main.temp}}
+			<br>
+			Feels Like: {{item.main.feels_like}}
+		</li>
+	</ul>
 </div>
