@@ -4,14 +4,14 @@
     createApp({
         data() {
             return {
-                randMin: 1,
-                randMax: 10,
-                random: -1,
-                history: []
+                cityName: "",
+				longitude: 0.00,
+				latitude: 0.00,
+				weather: {},
+				count: 0
             }
         },
         methods: {
-            GetRand: getRandom,
 			GetWeather: getWeather
         }
     }).mount('#app')
@@ -27,36 +27,35 @@
 	// )}
 	function getWeather() {
 		console.log("getWeather called")
-		let prom = fetch("weather")
-		prom.then( response => response.json())
+		let promise = fetch("weather/" + this.latitude + "/" + this.longitude)
+		promise.then( response => response.json())
 			.then (response => { 
-				this.random = response.result
-				this.history.push(response.result)
+				this.weather = response
 			}
 	)}
 	
 </script>
 
 <div id="app">
-    <h1> Welcome to the Random Number Generator </h1>
+	<h1>Weather App</h1>
+
+	<label>City Name</label>
+	<input type="text" v-model="cityName">
+	<br>
+
+	<label>Longitude</label>
+	<input type="number" step="0.01" v-model="longitude">
+	<br>
+
+	<label>Latitude</label>
+	<input type="number" step="0.01" v-model="latitude">
+	<br>
 	
-	Please enter a minimum and a maximum as the range of the Random Number
-	<br>
+	<button v-on:click="GetWeather">Get Weather</button>
 
-	Minimum: <input v-model="randMin">
-	Maximum: <input v-model="randMax">
-	<br>
-	<br>
+	<p>Inputted city: {{cityName}}</p>
+	<p>Inputted longitude: {{longitude}}</p>
+	<p>Inputted latitude: {{latitude}}</p>
 
-	<button v-on:click="GetRand">Generate Random Number</button> between {{randMin}} and {{randMax}}
-	<br>
-	Latest Random Number is {{random}}
-
-	<span v-if="history.length > 0">
-		<hr>
-		<h1>History of numbers generates</h1>
-		<ul>
-			<li v-for="num in history">{{num}}</li>
-		</ul>
-	</span>
+	<p>Weather: {{weather}}</p>
 </div>
