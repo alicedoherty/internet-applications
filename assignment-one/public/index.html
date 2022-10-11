@@ -11,19 +11,30 @@
             }
         },
         methods: {
-            GetRand: getRandom
+            GetRand: getRandom,
+			GetWeather: getWeather
         }
     }).mount('#app')
 
-    function getRandom() {
-		console.log("getRandom called")
-		let prom = fetch("random/"+this.randMin+"/"+this.randMax)
+    // function getRandom() {
+	// 	console.log("getRandom called")
+	// 	let prom = fetch("random/"+this.randMin+"/"+this.randMax)
+	// 	prom.then( response => response.json())
+	// 		.then (response => { 
+	// 			this.random = response.result
+	// 			this.history.push(response.result)
+	// 		}
+	// )}
+	function getWeather() {
+		console.log("getWeather called")
+		let prom = fetch("weather")
 		prom.then( response => response.json())
 			.then (response => { 
 				this.random = response.result
 				this.history.push(response.result)
 			}
 	)}
+	
 </script>
 
 <div id="app">
