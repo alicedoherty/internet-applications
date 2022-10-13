@@ -17,18 +17,10 @@ app.get("/weather/:city", sendWeatherData);
 
 function sendWeatherData(req, res) {
   let city = req.params.city;
-  // let lat = parseFloat(req.params.lat);
-  // let lon = parseFloat(req.params.lon);
 
   // Add to a private files
   let apiKey = "4fda716a357f34ff51ad31191ff68603";
-  // let url =
-  //   "https://api.openweathermap.org/data/2.5/forecast?lat=" +
-  //   lat +
-  //   "&lon=" +
-  //   lon +
-  //   "&appid=" +
-  //   apiKey;
+
   let url =
     "https://api.openweathermap.org/data/2.5/forecast?q=" +
     city +

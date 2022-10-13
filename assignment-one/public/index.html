@@ -6,8 +6,6 @@
         data() {
             return {
                 city: "",
-				// longitude: 0.00,
-				// latitude: 0.00,
 				weather: {}
             }
         },
@@ -24,26 +22,32 @@
 				this.weather = response
 			}
 	)}
-	
 </script>
 
-<div id="app">
-	<h1>Weather App</h1>
-
-	<label>City Name</label>
-	<input type="text" v-model="city">
-	<br>
+<!DOCTYPE html>
+	<head>
+		<title>Weather App</title>
+	</head>
+	<body>
+		<div id="app">
+			<h1>Weather App</h1>
 	
-	<button v-on:click="GetWeather">Get Weather</button>
-
-	<h2>{{city}} Weather</h2>
-	<ul>
-		<li v-for="item in weather.list">
-			Day/Time: {{item.dt_txt}}
+			<label>City Name</label>
+			<input type="text" v-model="city">
 			<br>
-			Temperature: {{item.main.temp}}
-			<br>
-			Feels Like: {{item.main.feels_like}}
-		</li>
-	</ul>
-</div>
+			
+			<button v-on:click="GetWeather">Get Weather</button>
+	
+			<h2>{{city}} Weather</h2>
+			<ul>
+				<li v-for="item in weather.list">
+					Day/Time: {{item.dt_txt}}
+					<br>
+					Temperature: {{item.main.temp}}
+					<br>
+					Feels Like: {{item.main.feels_like}}
+				</li>
+			</ul>
+		</div>
+	</body>
+</html>
