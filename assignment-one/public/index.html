@@ -1,31 +1,58 @@
 <script type="module">
 	// Add to separate .vue file
     import { createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js'
-	import ButtonComponent from './Button.js'
+	//import SampleComponent from './SampleComponent.js'
 
     createApp({
-		components: {
-			ButtonComponent
-		},
+		// components: {
+		// 	// Sample Component
+		// },
         data() {
             return {
                 city: "",
-				weather: {}
+				weather: {},
+				processedWeatherData: {},
+				today: new Date().toJSON().slice(0,10)
             }
         },
         methods: {
-			GetWeather: getWeather
+			GetWeather: getWeather,
+			ProcessData: processData
         }
     }).mount('#app')
 
-	function getWeather() {
+	async function getWeather(processData) {
 		console.log("getWeather called")
 		let promise = fetch("weather/" + this.city)
-		promise.then( response => response.json())
-			.then (response => { 
-				this.weather = response
+		let response = await promise
+		let json = await response.json()
+		this.weather = json
+		// Using async await so that we can get the weather before we try to convert it to 4 day weather
+
+		processData();
+
+	}
+
+	function processData() {
+		console.log("processData called")
+
+		let date = new Date()
+		// We want the date five days from now because that's the cutoff
+		date.setDate(date.getDate() + 5)
+		// Convert to JSON and slice because we only want yyyy-mm-dd
+		date = date.toJSON().slice(0,10);
+		console.log(date);
+		
+		for (let i = 0; i < this.weather.list.length; i++) {
+			if (this.weather.list[i].dt_txt.slice(0,10) != date) {
+				this.processedWeatherData[i] = this.weather.list[i]
+
+			} else {
+				break;
 			}
-	)}
+		}
+	}
+
 </script>
 
 <!DOCTYPE html>
@@ -35,22 +62,29 @@
 	<body>
 		<div id="app">
 			<h1>Weather App</h1>
-			<button-component></button-component>
 			<label>City Name</label>
 			<input type="text" v-model="city">
 			<br>
 			
-			<button v-on:click="GetWeather">Get Weather</button>
+			<!-- Add error handling for if city isn't inputted or is invalid -->
+			<button v-on:click="GetWeather(ProcessData)">Get Weather</button>
 	
-			<h2>{{city}} Weather</h2>
+			<h2>Summary Table</h2>
 			<ul>
-				<li v-for="item in weather.list">
-					Day/Time: {{item.dt_txt}}
-					<br>
-					Temperature: {{item.main.temp}}
-					<br>
-					Feels Like: {{item.main.feels_like}}
-				</li>
+				<template v-for="item in processedWeatherData">
+					<div v-if="item.dt_txt.slice(0,10)==today">
+						<h3>Today {{item.dt_txt.slice(0,10)}}</h3>
+
+					</div>
+
+				</template>
+				<!-- <template v-for="item in processedWeatherData">
+					<h3>Date/Time: {{item.dt_txt}}</h3>
+					<p>Temperature: {{item.main.temp}}</p>
+					<p>Wind Speed: {{item.wind.speed}}</p>
+					<p>Rainfall Level: {{item.rain}}</p>
+
+				</template> -->
 			</ul>
 		</div>
 	</body>

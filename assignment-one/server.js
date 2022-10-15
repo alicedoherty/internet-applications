@@ -13,7 +13,6 @@ app.use(express.static(publicPath));
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));
 
 app.get("/weather/:city", sendWeatherData);
-// app.get("/weather/:lat/:lon", sendWeatherData);
 
 function sendWeatherData(req, res) {
   let city = req.params.city;
@@ -27,6 +26,7 @@ function sendWeatherData(req, res) {
     "&appid=" +
     apiKey +
     "&units=metric";
+
   console.log(url);
 
   https.get(url, (response) => {

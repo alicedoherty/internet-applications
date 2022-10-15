@@ -1,4 +1,8 @@
 export default {
+  props: {
+    label: { required: true, type: String },
+    done: { default: false, type: Boolean },
+  },
   data() {
     return {
       count: 0,
