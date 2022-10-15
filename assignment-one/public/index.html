@@ -11,7 +11,7 @@
             return {
                 city: "",
 				weather: {},
-				processedWeatherData: {},
+				processedWeatherData: [],
 				today: new Date().toJSON().slice(0,10)
             }
         },
@@ -34,23 +34,55 @@
 	}
 
 	function processData() {
+		let numberOfDays = 5;
+
 		console.log("processData called")
 
-		let date = new Date()
-		// We want the date five days from now because that's the cutoff
-		date.setDate(date.getDate() + 5)
-		// Convert to JSON and slice because we only want yyyy-mm-dd
-		date = date.toJSON().slice(0,10);
-		console.log(date);
+		// let date = new Date()
+		// // We want the date five days from now because that's the cutoff
+		// date.setDate(date.getDate() + numberOfDays)
+		// // Convert to JSON and slice because we only want yyyy-mm-dd
+		// date = date.toJSON().slice(0,10);
+		// console.log(date);
 		
-		for (let i = 0; i < this.weather.list.length; i++) {
-			if (this.weather.list[i].dt_txt.slice(0,10) != date) {
-				this.processedWeatherData[i] = this.weather.list[i]
+		// for (let i = 0; i < this.weather.list.length; i++) {
+		// 	if (this.weather.list[i].dt_txt.slice(0,10) != date) {
+		// 		this.processedWeatherData[i] = this.weather.list[i]
 
-			} else {
-				break;
+		// 	} else {
+		// 		break;
+		// 	}
+		// }
+
+		// processedWeatherData: { [
+		// 	{
+		// 		date: YYYY-MM-DD,
+		// 		list: [
+		// 		]
+		// 	},
+		// 	{
+		// 		date: YYYY-MM-DD,
+		// 		list: [
+		// 		]
+		// 	}
+		// ]}
+
+		let currentDate = new Date()
+
+		for (let i = 0; i < numberOfDays; i++) {
+			this.processedWeatherData[i] = {date: currentDate.toJSON().slice(0,10), list: []};
+			currentDate.setDate(currentDate.getDate() + 1);
+		}
+
+		for (let i = 0; i < this.weather.list.length; i++) {
+			for (let j = 0; j < this.processedWeatherData.length; j++) {
+				if (this.weather.list[i].dt_txt.slice(0,10) == this.processedWeatherData[j].date) {
+					this.processedWeatherData[j].list.push(this.weather.list[i])
+				}
 			}
 		}
+
+		console.log(this.processedWeatherData)
 	}
 
 </script>
@@ -70,22 +102,33 @@
 			<button v-on:click="GetWeather(ProcessData)">Get Weather</button>
 	
 			<h2>Summary Table</h2>
-			<ul>
-				<template v-for="item in processedWeatherData">
-					<div v-if="item.dt_txt.slice(0,10)==today">
-						<h3>Today {{item.dt_txt.slice(0,10)}}</h3>
+			<template v-for="day in processedWeatherData">
+				<div v-if="day.date==today">
+					<h3>Today's Weather ({{day.list[0].dt_txt.slice(0,10)}})</h3>
+					<ul v-for="item in day.list">
+						<p>Temperature: {{item.main.temp}}</p>
+						<p>Wind Speed: {{item.wind.speed}}</p>
+						<p>Rainfall Level: {{item.rain}}</p>
+					</ul>
+				</div>
+				<div v-if="day.date!=today">
+					<h3>{{day.list[0].dt_txt.slice(0,10)}}</h3>
+					<ul v-for="item in day.list">
+						<h4>{{item.dt_txt.slice(11,20)}}</h4>
+						<p>Temperature: {{item.main.temp}}</p>
+						<p>Wind Speed: {{item.wind.speed}}</p>
+						<p>Rainfall Level: {{item.rain}}</p>
+					</ul>
+				</div>
 
-					</div>
-
-				</template>
+			</template>
 				<!-- <template v-for="item in processedWeatherData">
 					<h3>Date/Time: {{item.dt_txt}}</h3>
 					<p>Temperature: {{item.main.temp}}</p>
 					<p>Wind Speed: {{item.wind.speed}}</p>
 					<p>Rainfall Level: {{item.rain}}</p>
 
-				</template> -->
-			</ul>
+				</template>-->
 		</div>
 	</body>
 </html>
