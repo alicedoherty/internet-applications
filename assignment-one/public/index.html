@@ -1,8 +1,12 @@
 <script type="module">
 	// Add to separate .vue file
     import { createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js'
+	import ButtonComponent from './Button.js'
 
     createApp({
+		components: {
+			ButtonComponent
+		},
         data() {
             return {
                 city: "",
@@ -31,7 +35,7 @@
 	<body>
 		<div id="app">
 			<h1>Weather App</h1>
-	
+			<button-component></button-component>
 			<label>City Name</label>
 			<input type="text" v-model="city">
 			<br>
