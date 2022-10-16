@@ -1,15 +1,14 @@
-<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-
 <script type="module">
-	// Add to separate .vue file
     import { createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js'
-	import WeatherSummary from './WeatherSummary.js'
+	import HourlyWeatherSummary from './HourlyWeatherSummary.js'
+	import DailyWeatherSummary from './DailyWeatherSummary.js'
 	import AirQualitySummary from './AirQualitySummary.js'
 	import Packing from './Packing.js';
 
     createApp({
 		components: {
-			WeatherSummary,
+			HourlyWeatherSummary,
+			DailyWeatherSummary,
 			AirQualitySummary,
 			Packing,
 		},
@@ -190,29 +189,36 @@
 <!DOCTYPE html>
 	<head>
 		<title>Weather App</title>
+		<link rel="stylesheet" href="./styles.css">
+		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
 	</head>
 	<body>
 		<div id="app">
-			<h1>Weather App</h1>
-			<label>City Name</label>
-			<input type="text" v-model="city">
-			<br>
+			<div class="main"> 
+				<h1>🌤 Weather App 🌤</h1>
+				<p>Simply enter the city you are planning to visit and get the weather and air pollution forecast for the next few days. From this we'll recommend what you should pack.</p>
+				
+				<input v-model="city" class="form-control" type="text" placeholder="Destination city">
+				<button v-on:click="GetData(ProcessData)" class="btn btn-dark m-3">Submit</button>
 
-			<!-- Add error handling for if city isn't inputted or is invalid -->
-			<button v-on:click="GetData(ProcessData)">Get Weather</button>
-			
-			<div v-if="displayWeather">	
-				<h2>Packing</h2>
-				<packing :four-day-average="fourDayAverage" :rain="rain"></packing>
-
-				<h2>Air Quality Summary</h2>
-				<air-quality-summary :average-air-quality="averageAirQuality" :mask-recommended="maskRecommended"></air-quality-summary>
-				<button v-on:click="ShowAirQualityGraph">Show Air Quality Graph</button>
-				<div id="air-quality-graph"></div>
-
-				<h2>Weather Summary</h2>
-				<weather-summary v-for="day in processedWeather" v-bind="day"></weather-summary>
-			</div>	
+				<div v-if="displayWeather" class="m-4">	
+					<daily-weather-summary :processed-weather="processedWeather"></daily-weather-summary>
+	
+					<!-- <hourly-weather-summary v-for="day in processedWeather" v-bind="day"></hourly-weather-summary> -->
+	
+					<h2>Packing</h2>
+					<packing :four-day-average="fourDayAverage" :rain="rain"></packing>
+	
+					<h2>Air Quality Summary</h2>
+					<air-quality-summary :average-air-quality="averageAirQuality" :mask-recommended="maskRecommended"></air-quality-summary>
+					<button v-on:click="ShowAirQualityGraph">Show Air Quality Graph</button>
+					<div id="air-quality-graph"></div>
+	
+				</div>	
+			</div>
 		</div>
+		<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.min.js" integrity="sha384-IDwe1+LCz02ROU9k972gdyvl+AESN10+x7tBKgc9I5HFtuNz0wWnPclzo6p9vxnk" crossorigin="anonymous"></script>
+		<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 	</body>
 </html>
