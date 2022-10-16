@@ -14,6 +14,7 @@
                 city: "",
 				weather: {},
 				processedWeather: [],
+				displayWeather: false,
 				fourDayAverage: 0, 		// Average temperature over the next four days
 				rain: false				// Whether it is predicted to rain in the next four days
             }
@@ -110,6 +111,7 @@
 		console.log(this.processedWeather);
 		console.log(this.fourDayAverage);
 		console.log(this.rain);
+		this.displayWeather = true;
 	}
 
 </script>
@@ -124,14 +126,17 @@
 			<label>City Name</label>
 			<input type="text" v-model="city">
 			<br>
-			
+
 			<!-- Add error handling for if city isn't inputted or is invalid -->
 			<button v-on:click="GetWeather(ProcessData)">Get Weather</button>
 			
-			<h2>Packing</h2>
+			<div v-if="displayWeather">	
+				<h2>Packing</h2>
+				<packing :four-day-average="fourDayAverage" :rain="rain"></packing>
 
-			<h2>Weather Summary Table</h2>
-			<weather-summary v-for="day in processedWeather" v-bind="day"></weather-summary>
+				<h2>Weather Summary Table</h2>
+				<weather-summary v-for="day in processedWeather" v-bind="day"></weather-summary>
+			</div>	
 		</div>
 	</body>
 </html>

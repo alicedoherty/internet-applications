@@ -24,10 +24,10 @@ export default {
         </tr>
         <tr v-for="item in list">
           <td>{{item.dt_txt.slice(11,20)}}</td>
-          <td>{{item.main.temp}}</td>
-          <td>{{item.wind.speed}}</td>
+          <td>{{item.main.temp}}℃</td>
+          <td>{{item.wind.speed}}&nbsp meter/sec</td>
           <!-- TODO fix this -->
-          <td>{{item.rain}}</td>
+          <td>{{item.rain}}mm</td>
         </tr>
     </table>
     `,
