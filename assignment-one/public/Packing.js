@@ -7,41 +7,39 @@ export default {
     return {};
   },
   template: `
-    <p v-if="rain==true">It is predicted to rain over the next four days. Pack an umbrella!</p>
-    <p v-if="rain!=true">It is not predicted to rain over the next four days. You don't need to bring an umbrella!</p>
+    <h3>Packing Recommendations</h3>
+    <p v-if="rain==true">It is predicted to rain over the next four days. <i>Pack an umbrella!</i> ☔️</p>
+    <p v-if="rain==false">It is not predicted to rain over the next four days. <i>You don't need to bring an umbrella!</i> 😎</p>
 
     <p>The average temperature over the next four days is {{Math.round(fourDayAverage)}}℃.</p>
     
     <div v-if="fourDayAverage<12">
-        <p>You need to pack for cold weather.</p>
-        <p>Here are some suggestions!</p>
-        <ul>
-            <li><input type="checkbox">Coat</li>
-            <li><input type="checkbox">Gloves</li>
-            <li><input type="checkbox">Scarf</li>
-            <li><input type="checkbox">Hat</li>
+        <p>You need to pack for <i>cold weather</i>. Here are some suggestions!</p>
+        <ul class="list-group">
+            <li class="list-group-item">🧥 Coat</li>
+            <li class="list-group-item">🧤 Gloves</li>
+            <li class="list-group-item">🧣 Scarf</li>
+            <li class="list-group-item">🌂 Umbrella</li>
          </ul>
     </div>
 
     <div v-if="fourDayAverage>=12 && fourDayAverage<=24">
-        <p>You need to pack for mild weather.</p>
-        <p>Here are some suggestions!</p>
-        <ul>
-            <li><input type="checkbox">Jacket</li>
-            <li><input type="checkbox">T-shirts</li>
-            <li><input type="checkbox">Jeans</li>
-            <li><input type="checkbox">Runners</li>
+        <p>You need to pack for <i>mild weather</i>. Here are some suggestions!</p>
+        <ul class="list-group">
+            <li class="list-group-item">🧥 Jacket</li>
+            <li class="list-group-item">👕 T-shirts</li>
+            <li class="list-group-item">👖 Jeans</li>
+            <li class="list-group-item">👟 Runners</li>
          </ul>
     </div>
 
     <div v-if="fourDayAverage>24">
-        <p>You need to pack for hot weather.</p>
-        <p>Here are some suggestions!</p>
-        <ul>
-            <li><input type="checkbox">Sunglasses</li>
-            <li><input type="checkbox">Cap</li>
-            <li><input type="checkbox">Suncream</li>
-            <li><input type="checkbox">Flip flops</li>
+        <p>You need to pack for <i>hot weather</i>. Here are some suggestions!</p>
+        <ul class="list-group">
+            <li class="list-group-item">😎 Sunglasses</li>
+            <li class="list-group-item">🧢 Cap</li>
+            <li class="list-group-item">👙 Swimming togs</li>
+            <li class="list-group-item">🩴 Flip flops</li>
         </ul>
     </div>
     

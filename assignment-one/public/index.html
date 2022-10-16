@@ -16,15 +16,15 @@
             return {
                 city: "",
 				weather: {},
-				airPollution: {},
 				processedWeather: [],
 				displayWeather: false,
 				fourDayAverage: 0, 		// Average temperature over the next four days
 				rain: false,			// Whether it is predicted to rain in the next four days
 				lat: 0.00,				// Latitude for inputted city
 				lon: 0.00,				// Longitude for inputted city
+				airPollution: {},		// Air pollution data for inputted city
 				averageAirQuality: 0,	// Average air quality over the next four days
-				maskRecommended: false,			// Whether a mask is recommended based on the air quality
+				maskRecommended: false,	// Whether a mask is recommended based on the air quality
             }
         },
         methods: {
@@ -170,7 +170,10 @@
 		let data = [{
 			x: xArray,
 			y: yArray,
-			mode:"lines"
+			mode:"lines",
+			line: {
+				color: "#827397",
+			}
 		}];
 
 		// Define Layout
@@ -203,20 +206,23 @@
 
 				<div v-if="displayWeather" class="m-4">	
 					<daily-weather-summary :processed-weather="processedWeather"></daily-weather-summary>
-	
-					<!-- <hourly-weather-summary v-for="day in processedWeather" v-bind="day"></hourly-weather-summary> -->
-	
-					<h2>Packing</h2>
+					
+					<br>
+					<br>
+
 					<packing :four-day-average="fourDayAverage" :rain="rain"></packing>
 	
-					<h2>Air Quality Summary</h2>
+					<br>
+					<br>
+
 					<air-quality-summary :average-air-quality="averageAirQuality" :mask-recommended="maskRecommended"></air-quality-summary>
-					<button v-on:click="ShowAirQualityGraph">Show Air Quality Graph</button>
+					<button v-on:click="ShowAirQualityGraph" class="btn btn-dark">Show Graph of Air Quality</button>
 					<div id="air-quality-graph"></div>
 	
 				</div>	
 			</div>
 		</div>
+
 		<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
 		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.min.js" integrity="sha384-IDwe1+LCz02ROU9k972gdyvl+AESN10+x7tBKgc9I5HFtuNz0wWnPclzo6p9vxnk" crossorigin="anonymous"></script>
 		<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>

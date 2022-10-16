@@ -1,11 +1,6 @@
 export default {
   props: {
     processedWeather: { required: true, type: Array },
-    // averageRain: { required: true, type: Number },
-    // averageTemp: { required: true, type: Number },
-    // averageWind: { required: true, type: Number },
-    // date: { required: true, type: String },
-    // list: { required: true, type: Array },
   },
   data() {
     return {

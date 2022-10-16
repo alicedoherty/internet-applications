@@ -4,3 +4,12 @@
     margin: auto;
     text-align: center;
 }
+
+h1, h3 {
+    color: #363062;
+}
+
+button {
+    background-color: #827397 !important;
+    border: none !important;
+}
