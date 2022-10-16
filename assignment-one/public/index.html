@@ -1,38 +1,74 @@
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
 <script type="module">
 	// Add to separate .vue file
     import { createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js'
 	import WeatherSummary from './WeatherSummary.js'
-	import Packing from './Packing.js'
+	import AirQualitySummary from './AirQualitySummary.js'
+	import Packing from './Packing.js';
 
     createApp({
 		components: {
 			WeatherSummary,
-			Packing
+			AirQualitySummary,
+			Packing,
 		},
         data() {
             return {
                 city: "",
 				weather: {},
+				airPollution: {},
 				processedWeather: [],
 				displayWeather: false,
 				fourDayAverage: 0, 		// Average temperature over the next four days
-				rain: false				// Whether it is predicted to rain in the next four days
+				rain: false,			// Whether it is predicted to rain in the next four days
+				lat: 0.00,				// Latitude for inputted city
+				lon: 0.00,				// Longitude for inputted city
+				averageAirQuality: 0,	// Average air quality over the next four days
+				maskRecommended: false,			// Whether a mask is recommended based on the air quality
             }
         },
         methods: {
+			GetData: getData,
 			GetWeather: getWeather,
-			ProcessData: processData
+			GetAirPollution: getAirPollution,
+			ProcessData: processData,
+			ShowAirQualityGraph: showAirQualityGraph
         }
     }).mount('#app')
 
-	async function getWeather(processData) {
-		console.log("getWeather called")
-		let promise = fetch("weather/" + this.city)
-		let response = await promise
-		let json = await response.json()
-		this.weather = json
+	async function getData() {
+		await this.GetWeather();
+		// Don't call getAirPollution until getWeather has finished
+		await this.GetAirPollution();
+		this.ProcessData();
+	}
 
-		processData();
+	async function getWeather(processData) {
+		console.log("getWeather called");
+		let promise = fetch("weather/" + this.city);
+		let response = await promise;
+		let json = await response.json();
+		this.weather = json;
+
+		console.log(this.weather);
+
+		// Get latitude and longitude for inputted city
+		this.lat = this.weather.city.coord.lat;
+		this.lon = this.weather.city.coord.lon;
+
+		console.log("lat: " + this.lat);
+		console.log("lon: " + this.lon);
+	}
+
+	async function getAirPollution() {
+		console.log("getAirPollution called");
+		let promise = fetch("airpollution/" + this.lat + "/" + this.lon);
+		let response = await promise;
+		let json = await response.json();
+		this.airPollution = json;
+
+		console.log(this.airPollution);
 	}
 
 	function processData() {
@@ -49,14 +85,6 @@
 		// 		list: [
 		// 		]
 		// 	},
-		// 	{
-		//		averageRain: 0,
-		//		averageTemp: 0,
-		//		averageWind: 0,
-		// 		date: YYYY-MM-DD,
-		// 		list: [
-		// 		]
-		// 	}
 		// ]
 
 		let currentDate = new Date()
@@ -107,11 +135,54 @@
 			}
 		}
 
-		console.log(this.weather);	
 		console.log(this.processedWeather);
-		console.log(this.fourDayAverage);
-		console.log(this.rain);
+		console.log("Four Day Average: " + this.fourDayAverage);
+		console.log("Rain: " + this.rain);
 		this.displayWeather = true;
+
+		let totalPm2_5 = 0;
+		// Get average pm2_5 for the next 5 days
+		for (let i = 0; i < this.airPollution.list.length; i++) {
+			totalPm2_5 += this.airPollution.list[i].components.pm2_5;
+			if (this.airPollution.list[i].components.pm2_5 > 10) {
+				this.maskRecommended = true;
+			}
+		}
+		this.averageAirQuality = totalPm2_5 / this.airPollution.list.length;
+		console.log("Average Air Quality (PM_2.5): " + this.averageAirQuality);
+	}
+
+	function showAirQualityGraph() {
+		console.log("showAirQualityGraph called")
+
+		let date = new Date(1665925200*1000);
+		console.log(date.toJSON());
+
+		let xArray = [];
+		let yArray = [];
+
+		for (let i = 0; i < this.airPollution.list.length; i++) {
+			let date = new Date(this.airPollution.list[i].dt*1000);
+			xArray.push(date.toJSON());
+			yArray.push(this.airPollution.list[i].components.pm2_5);
+		}
+
+		// Define Data
+		let data = [{
+			x: xArray,
+			y: yArray,
+			mode:"lines"
+		}];
+
+		// Define Layout
+		var layout = {
+			xaxis: {title: "Date"},
+			yaxis: {title: "Сoncentration of PM_2.5, μg/m3"},  
+			title: "Air Quality"
+		};
+
+		// Display using Plotly
+		Plotly.newPlot("air-quality-graph", data, layout);
 	}
 
 </script>
@@ -128,13 +199,18 @@
 			<br>
 
 			<!-- Add error handling for if city isn't inputted or is invalid -->
-			<button v-on:click="GetWeather(ProcessData)">Get Weather</button>
+			<button v-on:click="GetData(ProcessData)">Get Weather</button>
 			
 			<div v-if="displayWeather">	
 				<h2>Packing</h2>
 				<packing :four-day-average="fourDayAverage" :rain="rain"></packing>
 
-				<h2>Weather Summary Table</h2>
+				<h2>Air Quality Summary</h2>
+				<air-quality-summary :average-air-quality="averageAirQuality" :mask-recommended="maskRecommended"></air-quality-summary>
+				<button v-on:click="ShowAirQualityGraph">Show Air Quality Graph</button>
+				<div id="air-quality-graph"></div>
+
+				<h2>Weather Summary</h2>
 				<weather-summary v-for="day in processedWeather" v-bind="day"></weather-summary>
 			</div>	
 		</div>
