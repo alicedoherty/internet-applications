@@ -1,18 +1,21 @@
 <script type="module">
 	// Add to separate .vue file
     import { createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js'
-	//import SampleComponent from './SampleComponent.js'
+	import WeatherSummary from './WeatherSummary.js'
+	import Packing from './Packing.js'
 
     createApp({
-		// components: {
-		// 	// Sample Component
-		// },
+		components: {
+			WeatherSummary,
+			Packing
+		},
         data() {
             return {
                 city: "",
 				weather: {},
-				processedWeatherData: [],
-				today: new Date().toJSON().slice(0,10)
+				processedWeather: [],
+				fourDayAverage: 0, 		// Average temperature over the next four days
+				rain: false				// Whether it is predicted to rain in the next four days
             }
         },
         methods: {
@@ -27,10 +30,8 @@
 		let response = await promise
 		let json = await response.json()
 		this.weather = json
-		// Using async await so that we can get the weather before we try to convert it to 4 day weather
 
 		processData();
-
 	}
 
 	function processData() {
@@ -38,51 +39,77 @@
 
 		console.log("processData called")
 
-		// let date = new Date()
-		// // We want the date five days from now because that's the cutoff
-		// date.setDate(date.getDate() + numberOfDays)
-		// // Convert to JSON and slice because we only want yyyy-mm-dd
-		// date = date.toJSON().slice(0,10);
-		// console.log(date);
-		
-		// for (let i = 0; i < this.weather.list.length; i++) {
-		// 	if (this.weather.list[i].dt_txt.slice(0,10) != date) {
-		// 		this.processedWeatherData[i] = this.weather.list[i]
-
-		// 	} else {
-		// 		break;
-		// 	}
-		// }
-
-		// processedWeatherData: { [
+		// processedWeather: [
 		// 	{
+		//		averageRain: 0,
+		//		averageTemp: 0,
+		//		averageWind: 0,
 		// 		date: YYYY-MM-DD,
 		// 		list: [
 		// 		]
 		// 	},
 		// 	{
+		//		averageRain: 0,
+		//		averageTemp: 0,
+		//		averageWind: 0,
 		// 		date: YYYY-MM-DD,
 		// 		list: [
 		// 		]
 		// 	}
-		// ]}
+		// ]
 
 		let currentDate = new Date()
 
 		for (let i = 0; i < numberOfDays; i++) {
-			this.processedWeatherData[i] = {date: currentDate.toJSON().slice(0,10), list: []};
+			this.processedWeather[i] = {
+				date: currentDate.toJSON().slice(0,10),
+				list: []
+			};
 			currentDate.setDate(currentDate.getDate() + 1);
-		}
 
-		for (let i = 0; i < this.weather.list.length; i++) {
-			for (let j = 0; j < this.processedWeatherData.length; j++) {
-				if (this.weather.list[i].dt_txt.slice(0,10) == this.processedWeatherData[j].date) {
-					this.processedWeatherData[j].list.push(this.weather.list[i])
+			for (let j = 0; j < this.weather.list.length; j++) {
+				if (this.weather.list[j].dt_txt.slice(0,10) == this.processedWeather[i].date) {
+					this.processedWeather[i].list.push(this.weather.list[j])
 				}
 			}
 		}
 
-		console.log(this.processedWeatherData)
+		// Calculate average temperature, wind speed, and rainfall for each day
+		for (let i = 0; i < this.processedWeather.length; i++) {
+			let totalTemp = 0;
+			let totalWind = 0;
+			let totalRain = 0;
+
+			for (let j = 0; j < this.processedWeather[i].list.length; j++) {
+				totalTemp += this.processedWeather[i].list[j].main.temp;
+				totalWind += this.processedWeather[i].list[j].wind.speed;
+				// totalRain += this.processedWeather[i].list[j].rain["3h"];
+			}
+
+			this.processedWeather[i].averageTemp = totalTemp / this.processedWeather[i].list.length;
+			this.processedWeather[i].averageWind = totalWind / this.processedWeather[i].list.length;
+			this.processedWeather[i].averageRain = totalRain / this.processedWeather[i].list.length;
+		}
+
+		// Calculate average temperature over the next four days
+		let totalTemp = 0;
+		for (let i = 0; i < this.processedWeather.length; i++) {
+			totalTemp += this.processedWeather[i].averageTemp;
+		}
+		this.fourDayAverage = totalTemp / this.processedWeather.length;
+
+		// Calculate whether it is predicted to rain in the next four days
+		for (let i = 0; i < this.processedWeather.length; i++) {
+			if (this.processedWeather[i].averageRain > 0) {
+				this.rain = true;
+				break;
+			}
+		}
+
+		console.log(this.weather);	
+		console.log(this.processedWeather);
+		console.log(this.fourDayAverage);
+		console.log(this.rain);
 	}
 
 </script>
@@ -100,35 +127,11 @@
 			
 			<!-- Add error handling for if city isn't inputted or is invalid -->
 			<button v-on:click="GetWeather(ProcessData)">Get Weather</button>
-	
-			<h2>Summary Table</h2>
-			<template v-for="day in processedWeatherData">
-				<div v-if="day.date==today">
-					<h3>Today's Weather ({{day.list[0].dt_txt.slice(0,10)}})</h3>
-					<ul v-for="item in day.list">
-						<p>Temperature: {{item.main.temp}}</p>
-						<p>Wind Speed: {{item.wind.speed}}</p>
-						<p>Rainfall Level: {{item.rain}}</p>
-					</ul>
-				</div>
-				<div v-if="day.date!=today">
-					<h3>{{day.list[0].dt_txt.slice(0,10)}}</h3>
-					<ul v-for="item in day.list">
-						<h4>{{item.dt_txt.slice(11,20)}}</h4>
-						<p>Temperature: {{item.main.temp}}</p>
-						<p>Wind Speed: {{item.wind.speed}}</p>
-						<p>Rainfall Level: {{item.rain}}</p>
-					</ul>
-				</div>
+			
+			<h2>Packing</h2>
 
-			</template>
-				<!-- <template v-for="item in processedWeatherData">
-					<h3>Date/Time: {{item.dt_txt}}</h3>
-					<p>Temperature: {{item.main.temp}}</p>
-					<p>Wind Speed: {{item.wind.speed}}</p>
-					<p>Rainfall Level: {{item.rain}}</p>
-
-				</template>-->
+			<h2>Weather Summary Table</h2>
+			<weather-summary v-for="day in processedWeather" v-bind="day"></weather-summary>
 		</div>
 	</body>
 </html>
