@@ -24,8 +24,8 @@ export default {
 
           <div class="modal-body">
             <div v-for="day in processedWeather">
-              <h5 v-if="day.date==today">Today</h5>
-              <h5 v-if="day.date!=today">{{day.date}}</h5>
+              <h5 v-if="day.date===today">Today</h5>
+              <h5 v-if="day.date!==today">{{day.date}}</h5>
               <table class="table table-bordered table-hover">
               <thead>
                   <tr>
@@ -40,7 +40,8 @@ export default {
                       <td>{{item.dt_txt.slice(11,20)}}</td>
                       <td>{{Math.round(item.main.temp)}}℃</td>
                       <td>{{item.wind.speed.toFixed(2)}}</td>
-                      <td>{{item.rain}}</td>
+                      <td v-if="item.hasOwnProperty('rain') === true">{{item.rain["3h"]}}</td>
+                      <td v-if="item.hasOwnProperty('rain') === false">0</td>
                   </tr>
                   <br>
               </tbody>

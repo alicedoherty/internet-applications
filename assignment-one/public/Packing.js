@@ -1,15 +1,15 @@
 export default {
   props: {
     fourDayAverage: { required: true, type: Number },
-    rain: { required: true, type: Boolean },
+    willRain: { required: true, type: Boolean },
   },
   data() {
     return {};
   },
   template: `
     <h3>Packing Recommendations</h3>
-    <p v-if="rain==true">It is predicted to rain over the next four days. <i>Pack an umbrella!</i> ☔️</p>
-    <p v-if="rain==false">It is not predicted to rain over the next four days. <i>You don't need to bring an umbrella!</i> 😎</p>
+    <p v-if="willRain==true">It is predicted to rain over the next four days. <i>Pack an umbrella!</i> ☔️</p>
+    <p v-if="willRain==false">It is not predicted to rain over the next four days. <i>You don't need to bring an umbrella!</i> 😎</p>
 
     <p>The average temperature over the next four days is {{Math.round(fourDayAverage)}}℃.</p>
     

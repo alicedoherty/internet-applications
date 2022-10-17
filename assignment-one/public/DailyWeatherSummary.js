@@ -32,7 +32,7 @@ export default {
                 <td v-if="day.date!=today">{{day.list[0].dt_txt.slice(0,10)}}</td>
                 <td>{{Math.round(day.averageTemp)}}℃</td>
                 <td>{{day.averageWind.toFixed(2)}}</td>
-                <td>{{day.averageRain}}</td>
+                <td>{{day.averageRain.toFixed(2)}}</td>
             </tr>
         </tbody>
       </table>

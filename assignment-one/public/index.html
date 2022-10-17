@@ -19,12 +19,13 @@
 				processedWeather: [],
 				displayWeather: false,
 				fourDayAverage: 0, 		// Average temperature over the next four days
-				rain: false,			// Whether it is predicted to rain in the next four days
+				willRain: false,			// Whether it is predicted to rain in the next four days
 				lat: 0.00,				// Latitude for inputted city
 				lon: 0.00,				// Longitude for inputted city
 				airPollution: {},		// Air pollution data for inputted city
 				averageAirQuality: 0,	// Average air quality over the next four days
 				maskRecommended: false,	// Whether a mask is recommended based on the air quality
+				innovativeFeature: {}
             }
         },
         methods: {
@@ -32,7 +33,8 @@
 			GetWeather: getWeather,
 			GetAirPollution: getAirPollution,
 			ProcessData: processData,
-			ShowAirQualityGraph: showAirQualityGraph
+			ShowAirQualityGraph: showAirQualityGraph,
+			GetInnovativeFeature: getInnovativeFeature
         }
     }).mount('#app')
 
@@ -111,9 +113,12 @@
 			for (let j = 0; j < this.processedWeather[i].list.length; j++) {
 				totalTemp += this.processedWeather[i].list[j].main.temp;
 				totalWind += this.processedWeather[i].list[j].wind.speed;
-				// totalRain += this.processedWeather[i].list[j].rain["3h"];
+				if (this.processedWeather[i].list[j].hasOwnProperty("rain")) {
+				 	totalRain += this.processedWeather[i].list[j].rain["3h"];
+ 				}
 			}
 
+			console.log(totalRain);
 			this.processedWeather[i].averageTemp = totalTemp / this.processedWeather[i].list.length;
 			this.processedWeather[i].averageWind = totalWind / this.processedWeather[i].list.length;
 			this.processedWeather[i].averageRain = totalRain / this.processedWeather[i].list.length;
@@ -129,14 +134,14 @@
 		// Calculate whether it is predicted to rain in the next four days
 		for (let i = 0; i < this.processedWeather.length; i++) {
 			if (this.processedWeather[i].averageRain > 0) {
-				this.rain = true;
+				this.willRain = true;
 				break;
 			}
 		}
 
 		console.log(this.processedWeather);
 		console.log("Four Day Average: " + this.fourDayAverage);
-		console.log("Rain: " + this.rain);
+		console.log("Rain: " + this.willRain);
 		this.displayWeather = true;
 
 		let totalPm2_5 = 0;
@@ -187,12 +192,22 @@
 		Plotly.newPlot("air-quality-graph", data, layout);
 	}
 
+	async function getInnovativeFeature() {
+		console.log("getInnovativeFeature");
+		let promise = fetch("innovative/" + this.city);
+		let response = await promise;
+		let json = await response.json();
+		this.innovativeFeature = json;
+
+		console.log(this.innovativeFeature);
+	}
+
 </script>
 
 <!DOCTYPE html>
 	<head>
 		<title>Weather App</title>
-		<link rel="stylesheet" href="./styles.css">
+		<link rel="stylesheet" href="./style.css">
 		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
 	</head>
 	<body>
@@ -210,7 +225,7 @@
 					<br>
 					<br>
 
-					<packing :four-day-average="fourDayAverage" :rain="rain"></packing>
+					<packing :four-day-average="fourDayAverage" :will-rain="willRain"></packing>
 	
 					<br>
 					<br>
@@ -220,6 +235,11 @@
 					<div id="air-quality-graph"></div>
 	
 				</div>	
+			</div>
+
+			<div class="innovative-feature">
+				<h1>Innovative Feature</h1>
+				<button v-on:click="GetInnovativeFeature" class="btn btn-dark m-3">Submit</button>
 			</div>
 		</div>
 

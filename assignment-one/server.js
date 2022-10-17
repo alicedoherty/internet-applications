@@ -77,3 +77,28 @@ function sendAirPollutionData(req, res) {
     });
   });
 }
+
+function getInnovativeFeature(req, res) {
+  let city = req.params.city;
+
+  let url =
+    "https://api.openweathermap.org/data/2.5/forecast?q=" +
+    city +
+    "&appid=" +
+    apiKey +
+    "&units=metric";
+
+  console.log(url);
+
+  https.get(url, (response) => {
+    let innovativeData = "";
+    response.on("data", (data) => {
+      innovativeData += data;
+    });
+    response.on("end", () => {
+      const finalInnovativeData = JSON.parse(innovativeData);
+      console.log(innovativeData);
+      res.json(innovativeData);
+    });
+  });
+}
