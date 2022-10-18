@@ -15,6 +15,9 @@ app.listen(port, () => console.log(`Example app listening on port ${port}!`));
 app.get("/weather/:city", sendWeatherData);
 app.get("/airpollution/:lat/:lon", sendAirPollutionData);
 
+// Rename names
+app.get("/location/:location", sendLocationData);
+
 function sendWeatherData(req, res) {
   let city = req.params.city;
 
@@ -78,27 +81,30 @@ function sendAirPollutionData(req, res) {
   });
 }
 
-function getInnovativeFeature(req, res) {
-  let city = req.params.city;
+function sendLocationData(req, res) {
+  let location = req.params.location;
+
+  // Add to a private files
+  let apiKey = "AIzaSyBBtyOlxkSFua7Dx7QU04UjtPzN6_8wd0E";
 
   let url =
-    "https://api.openweathermap.org/data/2.5/forecast?q=" +
-    city +
-    "&appid=" +
-    apiKey +
-    "&units=metric";
+    "https://maps.googleapis.com/maps/api/geocode/json?address=" +
+    location +
+    "&key=" +
+    apiKey;
 
   console.log(url);
 
+  // Check resources and see if it's necessary to do the += thing
   https.get(url, (response) => {
-    let innovativeData = "";
+    let locationData = "";
     response.on("data", (data) => {
-      innovativeData += data;
+      locationData += data;
     });
     response.on("end", () => {
-      const finalInnovativeData = JSON.parse(innovativeData);
-      console.log(innovativeData);
-      res.json(innovativeData);
+      const finalLocationData = JSON.parse(locationData);
+      console.log(finalLocationData);
+      res.json(finalLocationData);
     });
   });
 }

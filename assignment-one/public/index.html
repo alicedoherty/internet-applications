@@ -25,7 +25,6 @@
 				airPollution: {},		// Air pollution data for inputted city
 				averageAirQuality: 0,	// Average air quality over the next four days
 				maskRecommended: false,	// Whether a mask is recommended based on the air quality
-				innovativeFeature: {}
             }
         },
         methods: {
@@ -34,7 +33,6 @@
 			GetAirPollution: getAirPollution,
 			ProcessData: processData,
 			ShowAirQualityGraph: showAirQualityGraph,
-			GetInnovativeFeature: getInnovativeFeature
         }
     }).mount('#app')
 
@@ -192,16 +190,6 @@
 		Plotly.newPlot("air-quality-graph", data, layout);
 	}
 
-	async function getInnovativeFeature() {
-		console.log("getInnovativeFeature");
-		let promise = fetch("innovative/" + this.city);
-		let response = await promise;
-		let json = await response.json();
-		this.innovativeFeature = json;
-
-		console.log(this.innovativeFeature);
-	}
-
 </script>
 
 <!DOCTYPE html>
@@ -220,12 +208,12 @@
 				  <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
 					<div class="navbar-nav">
 						<a class="nav-link" href="/">Weather App</a>
-					  	<a class="nav-link" href="/innovativefeature.html">Innovative Feature</a>
+					  	<a class="nav-link" href="/tripplanner.html">Trip Planner</a>
 					</div>
 				  </div>
 				</div>
 			</nav>
-			
+
 			<div class="main">
 				<h1>🌤 Weather App 🌤</h1>
 				<p>Simply enter the city you are planning to visit to get the weather and air pollution forecast for the next few days. From this we'll recommend what you should pack!</p>

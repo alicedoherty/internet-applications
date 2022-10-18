@@ -6,57 +6,70 @@
 		},
         data() {
             return {
-                city: "",
+                location: "",
+                locationData: {},
+                lat: 0.00,
+                lon: 0.00,
+                // List of supported types: https://developers.google.com/maps/documentation/javascript/supported_types
+                type: "tourist_attraction"  // Default parameter in Google Maps
             }
         },
         methods: {
+          GetLocation: getLocation,
         }
     }).mount('#app')
 
-    // Source: https://developers.google.com/maps/documentation/javascript/places
+    async function getLocation() {
+      console.log("getLocation called");
+      let promise = fetch("location/" + this.location);
+      let response = await promise;
+      let json = await response.json();
+      this.locationData = json;
+
+      this.lat = this.locationData.results[0].geometry.location.lat;
+      this.lon = this.locationData.results[0].geometry.location.lng;
+
+      console.log(this.locationData)
+      console.log(this.lat);
+      console.log(this.lon);
+
+      console.log(this.type);
+      initMap(this.lat, this.lon, this.type);
+	  }
+
+// Source: https://developers.google.com/maps/documentation/javascript/places
 // Source: https://developers.google.com/maps/documentation/javascript/examples/place-search-pagination
+// Source: https://developers.google.com/maps/documentation/javascript/examples/place-details
 
-function initMap() {
+function initMap(lat, lon, type) {
   // Create the map.
-  const pyrmont = { lat: -33.866, lng: 151.196 };
+  const locationCoordinates = { lat: lat, lng: lon };
   const map = new google.maps.Map(document.getElementById("map"), {
-    center: pyrmont,
-    zoom: 17,
-    mapId: "8d193001f940fde3",
+    center: locationCoordinates,
+    zoom: 15,
   });
-  // Create the places service.
-  const service = new google.maps.places.PlacesService(map);
-  let getNextPage;
-  const moreButton = document.getElementById("more");
 
-  moreButton.onclick = function () {
-    moreButton.disabled = true;
-    if (getNextPage) {
-      getNextPage();
-    }
+  const request = {
+    placeId: "ChIJN1t_tDeuEmsRUsoyG83frY4",
+    fields: ["name", "formatted_address", "place_id", "geometry"],
   };
+
+  // Create the places service.
+  const infowindow = new google.maps.InfoWindow();
+  const service = new google.maps.places.PlacesService(map);
 
   // Perform a nearby search.
   service.nearbySearch(
-    { location: pyrmont, radius: 500, type: "store" },
-    (results, status, pagination) => {
+    { location: locationCoordinates, radius: 500, type: type},
+    (results, status) => {
       if (status !== "OK" || !results) return;
 
       addPlaces(results, map);
-      moreButton.disabled = !pagination || !pagination.hasNextPage;
-      if (pagination && pagination.hasNextPage) {
-        getNextPage = () => {
-          // Note: nextPage will call the same handler function as the initial call
-          pagination.nextPage();
-        };
-      }
     }
   );
 }
 
 function addPlaces(places, map) {
-  const placesList = document.getElementById("places");
-
   for (const place of places) {
     if (place.geometry && place.geometry.location) {
       const image = {
@@ -73,19 +86,11 @@ function addPlaces(places, map) {
         title: place.name,
         position: place.geometry.location,
       });
-
-      const li = document.createElement("li");
-
-      li.textContent = place.name;
-      placesList.appendChild(li);
-      li.addEventListener("click", () => {
-        map.setCenter(place.geometry.location);
-      });
     }
   }
 }
 
-window.initMap = initMap;
+// window.initMap = initMap;
 
 </script>
 
@@ -105,7 +110,7 @@ window.initMap = initMap;
 				  <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
 					<div class="navbar-nav">
 						<a class="nav-link" href="/">Weather App</a>
-					  	<a class="nav-link" href="/innovativefeature.html">Innovative Feature</a>
+					  	<a class="nav-link" href="/tripplanner">Trip Planner</a>
 					</div>
 				  </div>
 				</div>
@@ -115,22 +120,32 @@ window.initMap = initMap;
 				<h1>🗺 Plan Your Trip! 🗺</h1>
 				<p>Now that you know what the weather will be like and what to pack, let's find out more about the city you are travelling to!</p>
 				
-				<input v-model="city" class="form-control" type="text" placeholder="Destination city">
-				<button v-on:click="" class="btn btn-secondary m-3">Submit</button>
+				<input v-model="location" class="form-control" type="text" placeholder="Enter any location!">
+        <br>
+       
+        <label>(Optional) Select the type of place you're looking for.</label>
+        <br>
+        <br>
+        <select v-model="type" class="form-control">
+          <option>art_gallery</option>
+          <option>bus_station</option>
+          <option>cafe</option>
+          <option>museum</option>
+          <option>restaurant</option>
+          <option>store</option>
+          <option>tourist_attraction</option>
+        </select>
+        <button v-on:click="GetLocation" class="btn btn-secondary m-3">Submit</button>
                 
-                    <div id="map"></div>
-                    <div id="sidebar">
-                      <h2>Results</h2>
-                      <ul id="places"></ul>
-                      <button id="more">Load more results</button>
-                    </div>
+        <div id="map"></div>
+        </div>
             
-            </div>
+      </div>
 		</div>
 
         <!-- Loading Google Maps JavaScript API, source: https://developers.google.com/maps/documentation/javascript/places -->
         <script
-            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBBtyOlxkSFua7Dx7QU04UjtPzN6_8wd0E&libraries=places&callback=initMap" defer>
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBBtyOlxkSFua7Dx7QU04UjtPzN6_8wd0E&libraries=places" defer> 
         </script>
 
         <!-- Loading required JS for Bootstrap, source: https://getbootstrap.com/docs/5.2/getting-started/introduction/  -->
