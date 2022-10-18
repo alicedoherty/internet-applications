@@ -8,7 +8,7 @@ export default {
     };
   },
   template: `
-    <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#hourlyWeatherModal">
+    <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#hourlyWeatherModal">
       See more detailed forecast
     </button>
     

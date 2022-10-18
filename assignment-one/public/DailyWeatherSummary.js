@@ -13,7 +13,7 @@ export default {
     };
   },
   template: `
-    <h3>Four-Day Weather Forecast</h3>
+    <h3>4 Day Weather Forecast</h3>
     <p>Below is a summary of the weather forecast for the next four days. Each value represents the average of all datapoints from that day.</p>
     <hourly-weather-summary :processed-weather="processedWeather"></hourly-weather-summary>
     <br>

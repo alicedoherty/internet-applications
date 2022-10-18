@@ -5,7 +5,17 @@
     text-align: center;
 }
 
+.navbar-nav, .navbar-toggler {
+    margin-top: 15px !important;
+    margin: auto;
+}
+
 button {
     border: none !important;
-    background-color: #9c91ac !important;
 }
+
+#map {
+    flex-basis: 0;
+    flex-grow: 4;
+    height: 100%;
+  }

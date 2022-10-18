@@ -212,12 +212,26 @@
 	</head>
 	<body>
 		<div id="app">
-			<div class="main"> 
+			<nav class="navbar navbar-expand-lg">
+				<div class="container">
+				  <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+					<span class="navbar-toggler-icon"></span>
+				  </button>
+				  <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+					<div class="navbar-nav">
+						<a class="nav-link" href="/">Weather App</a>
+					  	<a class="nav-link" href="/innovativefeature.html">Innovative Feature</a>
+					</div>
+				  </div>
+				</div>
+			</nav>
+			
+			<div class="main">
 				<h1>🌤 Weather App 🌤</h1>
-				<p>Simply enter the city you are planning to visit and get the weather and air pollution forecast for the next few days. From this we'll recommend what you should pack.</p>
+				<p>Simply enter the city you are planning to visit to get the weather and air pollution forecast for the next few days. From this we'll recommend what you should pack!</p>
 				
 				<input v-model="city" class="form-control" type="text" placeholder="Destination city">
-				<button v-on:click="GetData(ProcessData)" class="btn btn-dark m-3">Submit</button>
+				<button v-on:click="GetData(ProcessData)" class="btn btn-secondary m-3">Submit</button>
 
 				<div v-if="displayWeather" class="m-4">	
 					<daily-weather-summary :processed-weather="processedWeather"></daily-weather-summary>
@@ -231,15 +245,10 @@
 					<br>
 
 					<air-quality-summary :average-air-quality="averageAirQuality" :mask-recommended="maskRecommended"></air-quality-summary>
-					<button v-on:click="ShowAirQualityGraph" class="btn btn-dark">Show Graph of Air Quality</button>
+					<button v-on:click="ShowAirQualityGraph" class="btn btn-secondary">Show graph of air quality</button>
 					<div id="air-quality-graph"></div>
 	
 				</div>	
-			</div>
-
-			<div class="innovative-feature">
-				<h1>Innovative Feature</h1>
-				<button v-on:click="GetInnovativeFeature" class="btn btn-dark m-3">Submit</button>
 			</div>
 		</div>
 

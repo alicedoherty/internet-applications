@@ -1,0 +1,140 @@
+<script type="module">
+    import { createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js'
+
+    createApp({
+		components: {
+		},
+        data() {
+            return {
+                city: "",
+            }
+        },
+        methods: {
+        }
+    }).mount('#app')
+
+    // Source: https://developers.google.com/maps/documentation/javascript/places
+// Source: https://developers.google.com/maps/documentation/javascript/examples/place-search-pagination
+
+function initMap() {
+  // Create the map.
+  const pyrmont = { lat: -33.866, lng: 151.196 };
+  const map = new google.maps.Map(document.getElementById("map"), {
+    center: pyrmont,
+    zoom: 17,
+    mapId: "8d193001f940fde3",
+  });
+  // Create the places service.
+  const service = new google.maps.places.PlacesService(map);
+  let getNextPage;
+  const moreButton = document.getElementById("more");
+
+  moreButton.onclick = function () {
+    moreButton.disabled = true;
+    if (getNextPage) {
+      getNextPage();
+    }
+  };
+
+  // Perform a nearby search.
+  service.nearbySearch(
+    { location: pyrmont, radius: 500, type: "store" },
+    (results, status, pagination) => {
+      if (status !== "OK" || !results) return;
+
+      addPlaces(results, map);
+      moreButton.disabled = !pagination || !pagination.hasNextPage;
+      if (pagination && pagination.hasNextPage) {
+        getNextPage = () => {
+          // Note: nextPage will call the same handler function as the initial call
+          pagination.nextPage();
+        };
+      }
+    }
+  );
+}
+
+function addPlaces(places, map) {
+  const placesList = document.getElementById("places");
+
+  for (const place of places) {
+    if (place.geometry && place.geometry.location) {
+      const image = {
+        url: place.icon,
+        size: new google.maps.Size(71, 71),
+        origin: new google.maps.Point(0, 0),
+        anchor: new google.maps.Point(17, 34),
+        scaledSize: new google.maps.Size(25, 25),
+      };
+
+      new google.maps.Marker({
+        map,
+        icon: image,
+        title: place.name,
+        position: place.geometry.location,
+      });
+
+      const li = document.createElement("li");
+
+      li.textContent = place.name;
+      placesList.appendChild(li);
+      li.addEventListener("click", () => {
+        map.setCenter(place.geometry.location);
+      });
+    }
+  }
+}
+
+window.initMap = initMap;
+
+</script>
+
+<!DOCTYPE html>
+	<head>
+		<title>Weather App</title>
+		<link rel="stylesheet" href="./style.css">
+		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+	</head>
+	<body>
+		<div id="app">
+			<nav class="navbar navbar-expand-lg">
+				<div class="container">
+				  <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+					<span class="navbar-toggler-icon"></span>
+				  </button>
+				  <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+					<div class="navbar-nav">
+						<a class="nav-link" href="/">Weather App</a>
+					  	<a class="nav-link" href="/innovativefeature.html">Innovative Feature</a>
+					</div>
+				  </div>
+				</div>
+			</nav>
+
+			<div class="main">
+				<h1>🗺 Plan Your Trip! 🗺</h1>
+				<p>Now that you know what the weather will be like and what to pack, let's find out more about the city you are travelling to!</p>
+				
+				<input v-model="city" class="form-control" type="text" placeholder="Destination city">
+				<button v-on:click="" class="btn btn-secondary m-3">Submit</button>
+                
+                    <div id="map"></div>
+                    <div id="sidebar">
+                      <h2>Results</h2>
+                      <ul id="places"></ul>
+                      <button id="more">Load more results</button>
+                    </div>
+            
+            </div>
+		</div>
+
+        <!-- Loading Google Maps JavaScript API, source: https://developers.google.com/maps/documentation/javascript/places -->
+        <script
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBBtyOlxkSFua7Dx7QU04UjtPzN6_8wd0E&libraries=places&callback=initMap" defer>
+        </script>
+
+        <!-- Loading required JS for Bootstrap, source: https://getbootstrap.com/docs/5.2/getting-started/introduction/  -->
+		<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.min.js" integrity="sha384-IDwe1+LCz02ROU9k972gdyvl+AESN10+x7tBKgc9I5HFtuNz0wWnPclzo6p9vxnk" crossorigin="anonymous"></script>
+	</body>
+</html>
