@@ -13,13 +13,17 @@
         // List of supported types: https://developers.google.com/maps/documentation/javascript/supported_types
         type: "tourist_attraction",  // Default parameter in Google Maps
         displayContent: false,
+        cityScores: {},
       }
     },
     methods: {
       GetLocation: getLocation,
+      GetCityScores: getCityScores,
+      ShowCityScoresGraph: showCityScoresGraph
     }
   }).mount('#app')
 
+  // Put getLocation and getCity scores into one
   async function getLocation() {
     console.log("getLocation called");
     let promise = fetch("location/" + this.location);
@@ -35,8 +39,18 @@
     console.log(this.lon);
 
     console.log(this.type);
+    // initMap(this.lat, this.lon, this.type);
+  }
+
+  async function getCityScores() {
+    console.log("getCityScores called");
+    let promise = fetch("cityScores/" + this.location);
+    let response = await promise;
+    let json = await response.json();
+    this.cityScores = json;
+
+    console.log(this.cityScores);
     this.displayContent = true;
-    initMap(this.lat, this.lon, this.type);
   }
 
   // Source: https://developers.google.com/maps/documentation/javascript/places
@@ -120,6 +134,30 @@
     }
   }
 
+  function showCityScoresGraph() {
+    console.log("showCityScoresGraph called")
+
+    var data = [{
+      type: 'bar',
+      x: [this.cityScores.categories[1].score_out_of_10, this.cityScores.categories[7].score_out_of_10, this.cityScores.categories[13].score_out_of_10, this.cityScores.categories[14].score_out_of_10, this.cityScores.categories[16].score_out_of_10],
+      y: ["Cost of Living", "Safety", "Internet Access", "Leisure & Culture", "Outdoors"],
+      orientation: 'h'
+    }]
+
+    // Define Layout
+    var layout = {
+      xaxis: { title: "Score (out of 10)" },
+      yaxis: { title: "Score" },
+      title: "City Scores"
+    };
+
+    // Display using Plotly
+    Plotly.newPlot("city-scores-graph", data, layout);
+
+    var summary = document.getElementById("city-summary");
+    summary.innerHTML = this.cityScores.summary;
+  }
+
 // window.initMap = initMap;
 
 </script>
@@ -155,7 +193,7 @@
       <p>Now that you know what the weather will be like and what to pack, let's find out more about the city you are
         travelling to!</p>
 
-      <input v-model="location" class="form-control" type="text" placeholder="Enter any location!">
+      <input v-model="location" class="form-control" type="text" placeholder="Enter the city you're travelling to!">
       <br>
 
       <label>(Optional) Select the type of place you're looking for.</label>
@@ -170,11 +208,17 @@
         <option>store</option>
         <option>tourist_attraction</option>
       </select>
-      <button v-on:click="GetLocation" class="btn btn-secondary m-3">Submit</button>
+      <button v-on:click="GetLocation(); GetCityScores();" class="btn btn-secondary m-3">Submit</button>
+
 
       <br>
       <br>
       <div v-if="displayContent" class="container">
+        <h3>Get to Know {{this.locationData.results[0].formatted_address}} Better!</h3>
+        <p id="city-summary"></p>
+        <button v-on:click="ShowCityScoresGraph" class="btn btn-secondary">Show city scores</button>
+        <div id="city-scores-graph"></div>
+
         <h3>What to do in {{this.locationData.results[0].formatted_address}}</h3>
         <br>
       </div>
@@ -209,6 +253,8 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.min.js"
     integrity="sha384-IDwe1+LCz02ROU9k972gdyvl+AESN10+x7tBKgc9I5HFtuNz0wWnPclzo6p9vxnk"
     crossorigin="anonymous"></script>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
 </body>
 
 </html>

@@ -18,6 +18,10 @@ app.get("/airpollution/:lat/:lon", sendAirPollutionData);
 // Rename names
 app.get("/location/:location", sendLocationData);
 
+app.get("/cityScores/:city", sendCityScoresData);
+
+// TODO Create one function with params for the functions below
+
 function sendWeatherData(req, res) {
   let city = req.params.city;
 
@@ -105,6 +109,27 @@ function sendLocationData(req, res) {
       const finalLocationData = JSON.parse(locationData);
       console.log(finalLocationData);
       res.json(finalLocationData);
+    });
+  });
+}
+
+function sendCityScoresData(req, res) {
+  let city = req.params.city;
+
+  let url =
+    "https://api.teleport.org/api/urban_areas/slug:" + city + "/scores/";
+
+  console.log(url);
+
+  https.get(url, (response) => {
+    let cityScoresData = "";
+    response.on("data", (data) => {
+      cityScoresData += data;
+    });
+    response.on("end", () => {
+      const finalCityScoresData = JSON.parse(cityScoresData);
+      console.log(finalCityScoresData);
+      res.json(finalCityScoresData);
     });
   });
 }

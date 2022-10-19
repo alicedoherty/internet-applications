@@ -1,8 +1,8 @@
-import HourlyWeatherSummary from "./HourlyWeatherSummary.js";
+import HourlyWeather from "./HourlyWeather.js";
 
 export default {
   components: {
-    HourlyWeatherSummary,
+    HourlyWeather,
   },
   props: {
     processedWeather: { required: true, type: Array },
@@ -15,7 +15,7 @@ export default {
   template: `
     <h3>4 Day Weather Forecast</h3>
     <p>Below is a summary of the weather forecast for the next four days. Each value represents the average of all datapoints from that day.</p>
-    <hourly-weather-summary :processed-weather="processedWeather"></hourly-weather-summary>
+    <hourly-weather :processed-weather="processedWeather"></hourly-weather>
     <br>
     <table class="table table-bordered table-hover">
         <thead>
@@ -29,7 +29,7 @@ export default {
         <tbody>
             <tr v-for="day in processedWeather">
                 <td v-if="day.date==today">Today</td>
-                <td v-if="day.date!=today">{{day.list[0].dt_txt.slice(0,10)}}</td>
+                <td v-else>{{day.list[0].dt_txt.slice(0,10)}}</td>
                 <td>{{Math.round(day.averageTemp)}}℃</td>
                 <td>{{day.averageWind.toFixed(2)}}</td>
                 <td>{{day.averageRain.toFixed(2)}}</td>

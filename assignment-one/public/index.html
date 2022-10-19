@@ -1,15 +1,13 @@
 <script type="module">
 	import { createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js'
-	import HourlyWeatherSummary from './HourlyWeatherSummary.js'
-	import DailyWeatherSummary from './DailyWeatherSummary.js'
-	import AirQualitySummary from './AirQualitySummary.js'
+	import DailyWeather from './DailyWeather.js'
+	import AirQuality from './AirQuality.js'
 	import Packing from './Packing.js';
 
 	createApp({
 		components: {
-			HourlyWeatherSummary,
-			DailyWeatherSummary,
-			AirQualitySummary,
+			DailyWeather,
+			AirQuality,
 			Packing,
 		},
 		data() {
@@ -17,14 +15,14 @@
 				city: "",
 				weather: {},
 				processedWeather: [],
-				displayContent: false,
 				fourDayAverage: 0, 		// Average temperature over the next four days
-				willRain: false,			// Whether it is predicted to rain in the next four days
+				willRain: false,		// Whether it is predicted to rain in the next four days
 				lat: 0.00,				// Latitude for inputted city
 				lon: 0.00,				// Longitude for inputted city
 				airPollution: {},		// Air pollution data for inputted city
 				averageAirQuality: 0,	// Average air quality over the next four days
 				maskRecommended: false,	// Whether a mask is recommended based on the air quality
+				displayContent: false,
 			}
 		},
 		methods: {
@@ -37,10 +35,11 @@
 	}).mount('#app')
 
 	async function getData() {
+		// Use of await as each function is dependent on the comepletion of the previous
 		await this.GetWeather();
-		// Don't call getAirPollution until getWeather has finished
 		await this.GetAirPollution();
-		this.ProcessData();
+		await this.ProcessData();
+		this.ShowAirQualityGraph();
 	}
 
 	async function getWeather(processData) {
@@ -49,15 +48,11 @@
 		let response = await promise;
 		let json = await response.json();
 		this.weather = json;
-
 		console.log(this.weather);
 
-		// Get latitude and longitude for inputted city
+		// Get latitude and longitude for inputted city (needed to get air pollution data)
 		this.lat = this.weather.city.coord.lat;
 		this.lon = this.weather.city.coord.lon;
-
-		console.log("lat: " + this.lat);
-		console.log("lon: " + this.lon);
 	}
 
 	async function getAirPollution() {
@@ -66,33 +61,45 @@
 		let response = await promise;
 		let json = await response.json();
 		this.airPollution = json;
-
 		console.log(this.airPollution);
 	}
 
-	function processData() {
-		let numberOfDays = 5;
+	/*
+		Process the weather and air pollution data so it is more usable.
+		- processedWeather: For each day, calculate the average temperature, wind speed, and rainfall (for summary table)
+		- fourDayAverage: Calculate the average temperature over the next four days (for indicating what type of weather to pack for)
+		- willRain: Whether it is predicted to rain in the next four days (for indicating whether to bring an umbrella)
+		- averageAirQuality: Calculate the average PM_2.5 for the next 5 days
+		- maskRecommended: Whether PM_2.5 is predicted to reach over 10μg/m3 in the next 5 days (for indicating whether to bring a mask)
 
+		processedWeather: [
+			{
+				averageRain: 0,
+				averageTemp: 0,
+				averageWind: 0,
+				date: YYYY-MM-DD,
+				list: [ <Full data from Open Weather API> ]
+			},
+			...
+		]
+	*/
+	async function processData() {
 		console.log("processData called")
 
-		// processedWeather: [
-		// 	{
-		//		averageRain: 0,
-		//		averageTemp: 0,
-		//		averageWind: 0,
-		// 		date: YYYY-MM-DD,
-		// 		list: [
-		// 		]
-		// 	},
-		// ]
-
+		// We want the forecast for the next four days, as well as today's forecast so 5 days in total
+		const NUM_OF_DAYS = 5;
 		let currentDate = new Date()
 
-		for (let i = 0; i < numberOfDays; i++) {
+		// Add all datapoints for the current day to the 'list' array
+		for (let i = 0; i < NUM_OF_DAYS; i++) {
 			this.processedWeather[i] = {
 				date: currentDate.toJSON().slice(0, 10),
+				averageRain: 0,
+				averageTemp: 0,
+				averageWind: 0,
 				list: []
 			};
+
 			currentDate.setDate(currentDate.getDate() + 1);
 
 			for (let j = 0; j < this.weather.list.length; j++) {
@@ -103,7 +110,7 @@
 		}
 
 		// Calculate average temperature, wind speed, and rainfall for each day
-		for (let i = 0; i < this.processedWeather.length; i++) {
+		for (let i = 0; i < NUM_OF_DAYS; i++) {
 			let totalTemp = 0;
 			let totalWind = 0;
 			let totalRain = 0;
@@ -111,12 +118,12 @@
 			for (let j = 0; j < this.processedWeather[i].list.length; j++) {
 				totalTemp += this.processedWeather[i].list[j].main.temp;
 				totalWind += this.processedWeather[i].list[j].wind.speed;
+				// "Rain" field is not always present, so check if it exists first to avoid errors
 				if (this.processedWeather[i].list[j].hasOwnProperty("rain")) {
 					totalRain += this.processedWeather[i].list[j].rain["3h"];
 				}
 			}
 
-			console.log(totalRain);
 			this.processedWeather[i].averageTemp = totalTemp / this.processedWeather[i].list.length;
 			this.processedWeather[i].averageWind = totalWind / this.processedWeather[i].list.length;
 			this.processedWeather[i].averageRain = totalRain / this.processedWeather[i].list.length;
@@ -124,41 +131,39 @@
 
 		// Calculate average temperature over the next four days
 		let totalTemp = 0;
-		for (let i = 0; i < this.processedWeather.length; i++) {
+
+		for (let i = 0; i < NUM_OF_DAYS; i++) {
 			totalTemp += this.processedWeather[i].averageTemp;
 		}
+
 		this.fourDayAverage = totalTemp / this.processedWeather.length;
 
-		// Calculate whether it is predicted to rain in the next four days
-		for (let i = 0; i < this.processedWeather.length; i++) {
+		// Determine whether it is predicted to rain in the next four days
+		for (let i = 0; i < NUM_OF_DAYS; i++) {
 			if (this.processedWeather[i].averageRain > 0) {
 				this.willRain = true;
 				break;
 			}
 		}
 
-		console.log(this.processedWeather);
-		console.log("Four Day Average: " + this.fourDayAverage);
-		console.log("Rain: " + this.willRain);
-		this.displayContent = true;
-
+		// Calculate average PM_2.5 for the next 5 days and whether PM_2.5 will reach over 10μg/m3
 		let totalPm2_5 = 0;
-		// Get average pm2_5 for the next 5 days
+
 		for (let i = 0; i < this.airPollution.list.length; i++) {
 			totalPm2_5 += this.airPollution.list[i].components.pm2_5;
 			if (this.airPollution.list[i].components.pm2_5 > 10) {
 				this.maskRecommended = true;
 			}
 		}
+
 		this.averageAirQuality = totalPm2_5 / this.airPollution.list.length;
-		console.log("Average Air Quality (PM_2.5): " + this.averageAirQuality);
+
+		// Display weather and air pollution data
+		this.displayContent = true;
 	}
 
 	function showAirQualityGraph() {
 		console.log("showAirQualityGraph called")
-
-		let date = new Date(1665925200 * 1000);
-		console.log(date.toJSON());
 
 		let xArray = [];
 		let yArray = [];
@@ -169,7 +174,6 @@
 			yArray.push(this.airPollution.list[i].components.pm2_5);
 		}
 
-		// Define Data
 		let data = [{
 			x: xArray,
 			y: yArray,
@@ -179,17 +183,14 @@
 			}
 		}];
 
-		// Define Layout
 		var layout = {
 			xaxis: { title: "Date" },
 			yaxis: { title: "Сoncentration of PM_2.5, μg/m3" },
-			title: "Air Quality"
+			title: "5 Day Air Quality Forecast"
 		};
 
-		// Display using Plotly
 		Plotly.newPlot("air-quality-graph", data, layout);
 	}
-
 </script>
 
 <!DOCTYPE html>
@@ -197,24 +198,23 @@
 <head>
 	<title>Weather App</title>
 	<link rel="stylesheet" href="./style.css">
+	<!-- Link to Bootstrap's CSS, used for basic styling. Source: https://getbootstrap.com/docs/5.2 -->
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet"
 		integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
 </head>
 
 <body>
 	<div id="app">
+
 		<nav class="navbar navbar-expand-lg">
-			<div class="container">
-				<button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-					data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false"
-					aria-label="Toggle navigation">
-					<span class="navbar-toggler-icon"></span>
-				</button>
-				<div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-					<div class="navbar-nav">
-						<a class="nav-link" href="/">Weather App</a>
-						<a class="nav-link" href="/tripplanner.html">Trip Planner</a>
-					</div>
+			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
+				aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+				<span class="navbar-toggler-icon"></span>
+			</button>
+			<div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+				<div class="navbar-nav">
+					<a class="nav-link" href="/">Weather App</a>
+					<a class="nav-link" href="/tripplanner.html">Trip Planner</a>
 				</div>
 			</div>
 		</nav>
@@ -225,10 +225,12 @@
 				next few days. From this we'll recommend what you should pack!</p>
 
 			<input v-model="city" class="form-control" type="text" placeholder="Destination city">
-			<button v-on:click="GetData(ProcessData)" class="btn btn-secondary m-3">Submit</button>
+			<button v-on:click="GetData" class="btn btn-secondary m-3">Submit</button>
 
-			<div v-if="displayContent" class="m-4">
-				<daily-weather-summary :processed-weather="processedWeather"></daily-weather-summary>
+			<div v-if="displayContent">
+				<br>
+
+				<daily-weather :processed-weather="processedWeather"></daily-weather>
 
 				<br>
 				<br>
@@ -238,21 +240,18 @@
 				<br>
 				<br>
 
-				<air-quality-summary :average-air-quality="averageAirQuality" :mask-recommended="maskRecommended">
-				</air-quality-summary>
-				<button v-on:click="ShowAirQualityGraph" class="btn btn-secondary">Show graph of air quality</button>
+				<air-quality :average-air-quality="averageAirQuality" :mask-recommended="maskRecommended"></air-quality>
 				<div id="air-quality-graph"></div>
 
 			</div>
 		</div>
 	</div>
 
-	<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
-		integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3"
+	<!-- Link to Bootstrap's JS, used for basic styling. Source: https://getbootstrap.com/docs/5.2 -->
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"
+		integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3"
 		crossorigin="anonymous"></script>
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.min.js"
-		integrity="sha384-IDwe1+LCz02ROU9k972gdyvl+AESN10+x7tBKgc9I5HFtuNz0wWnPclzo6p9vxnk"
-		crossorigin="anonymous"></script>
+	<!-- Link to plotly.js CDN used for graphs -->
 	<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </body>
 

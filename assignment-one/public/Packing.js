@@ -3,13 +3,10 @@ export default {
     fourDayAverage: { required: true, type: Number },
     willRain: { required: true, type: Boolean },
   },
-  data() {
-    return {};
-  },
   template: `
     <h3>Packing Recommendations</h3>
     <p v-if="willRain==true">It is predicted to rain over the next four days. <i>Pack an umbrella!</i> ☔️</p>
-    <p v-if="willRain==false">It is not predicted to rain over the next four days. <i>You don't need to bring an umbrella!</i> 😎</p>
+    <p v-else>It is not predicted to rain over the next four days. <i>You don't need to bring an umbrella!</i> 😎</p>
 
     <p>The average temperature over the next four days is {{Math.round(fourDayAverage)}}℃.</p>
     
@@ -42,6 +39,5 @@ export default {
             <li class="list-group-item">🩴 Flip flops</li>
         </ul>
     </div>
-    
 `,
 };

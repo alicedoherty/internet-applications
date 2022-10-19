@@ -25,31 +25,33 @@ export default {
           <div class="modal-body">
             <div v-for="day in processedWeather">
               <h5 v-if="day.date===today">Today</h5>
-              <h5 v-if="day.date!==today">{{day.date}}</h5>
+              <h5 v-else>{{day.date}}</h5>
+              
               <table class="table table-bordered table-hover">
-              <thead>
-                  <tr>
-                      <th>Time</th>
-                      <th>Temperature</th>
-                      <th>Wind Speed (meter/sec)</th>
-                      <th>Rainfall Level (mm)</th>
-                  </tr>
-              </thead>
-              <tbody>
-                  <tr v-for="item in day.list">
-                      <td>{{item.dt_txt.slice(11,20)}}</td>
-                      <td>{{Math.round(item.main.temp)}}℃</td>
-                      <td>{{item.wind.speed.toFixed(2)}}</td>
-                      <td v-if="item.hasOwnProperty('rain') === true">{{item.rain["3h"]}}</td>
-                      <td v-if="item.hasOwnProperty('rain') === false">0</td>
-                  </tr>
-                  <br>
-              </tbody>
-            </table>
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>Temperature</th>
+                        <th>Wind Speed (meter/sec)</th>
+                        <th>Rainfall Level (mm)</th>
+                    </tr>
+                </thead>
+                
+                <tbody>
+                    <tr v-for="item in day.list">
+                        <td>{{item.dt_txt.slice(11,20)}}</td>
+                        <td>{{Math.round(item.main.temp)}}℃</td>
+                        <td>{{item.wind.speed.toFixed(2)}}</td>
+                        <td v-if="item.hasOwnProperty('rain') === true">{{item.rain["3h"]}}</td>
+                        <td v-else>0</td>
+                    </tr>
+                    <br>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
   `,
 };
