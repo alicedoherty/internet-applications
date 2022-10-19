@@ -1,23 +1,23 @@
 <script type="module">
-    import { createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js'
+	import { createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js'
 	import HourlyWeatherSummary from './HourlyWeatherSummary.js'
 	import DailyWeatherSummary from './DailyWeatherSummary.js'
 	import AirQualitySummary from './AirQualitySummary.js'
 	import Packing from './Packing.js';
 
-    createApp({
+	createApp({
 		components: {
 			HourlyWeatherSummary,
 			DailyWeatherSummary,
 			AirQualitySummary,
 			Packing,
 		},
-        data() {
-            return {
-                city: "",
+		data() {
+			return {
+				city: "",
 				weather: {},
 				processedWeather: [],
-				displayWeather: false,
+				displayContent: false,
 				fourDayAverage: 0, 		// Average temperature over the next four days
 				willRain: false,			// Whether it is predicted to rain in the next four days
 				lat: 0.00,				// Latitude for inputted city
@@ -25,16 +25,16 @@
 				airPollution: {},		// Air pollution data for inputted city
 				averageAirQuality: 0,	// Average air quality over the next four days
 				maskRecommended: false,	// Whether a mask is recommended based on the air quality
-            }
-        },
-        methods: {
+			}
+		},
+		methods: {
 			GetData: getData,
 			GetWeather: getWeather,
 			GetAirPollution: getAirPollution,
 			ProcessData: processData,
 			ShowAirQualityGraph: showAirQualityGraph,
-        }
-    }).mount('#app')
+		}
+	}).mount('#app')
 
 	async function getData() {
 		await this.GetWeather();
@@ -90,13 +90,13 @@
 
 		for (let i = 0; i < numberOfDays; i++) {
 			this.processedWeather[i] = {
-				date: currentDate.toJSON().slice(0,10),
+				date: currentDate.toJSON().slice(0, 10),
 				list: []
 			};
 			currentDate.setDate(currentDate.getDate() + 1);
 
 			for (let j = 0; j < this.weather.list.length; j++) {
-				if (this.weather.list[j].dt_txt.slice(0,10) == this.processedWeather[i].date) {
+				if (this.weather.list[j].dt_txt.slice(0, 10) == this.processedWeather[i].date) {
 					this.processedWeather[i].list.push(this.weather.list[j])
 				}
 			}
@@ -112,8 +112,8 @@
 				totalTemp += this.processedWeather[i].list[j].main.temp;
 				totalWind += this.processedWeather[i].list[j].wind.speed;
 				if (this.processedWeather[i].list[j].hasOwnProperty("rain")) {
-				 	totalRain += this.processedWeather[i].list[j].rain["3h"];
- 				}
+					totalRain += this.processedWeather[i].list[j].rain["3h"];
+				}
 			}
 
 			console.log(totalRain);
@@ -140,7 +140,7 @@
 		console.log(this.processedWeather);
 		console.log("Four Day Average: " + this.fourDayAverage);
 		console.log("Rain: " + this.willRain);
-		this.displayWeather = true;
+		this.displayContent = true;
 
 		let totalPm2_5 = 0;
 		// Get average pm2_5 for the next 5 days
@@ -157,14 +157,14 @@
 	function showAirQualityGraph() {
 		console.log("showAirQualityGraph called")
 
-		let date = new Date(1665925200*1000);
+		let date = new Date(1665925200 * 1000);
 		console.log(date.toJSON());
 
 		let xArray = [];
 		let yArray = [];
 
 		for (let i = 0; i < this.airPollution.list.length; i++) {
-			let date = new Date(this.airPollution.list[i].dt*1000);
+			let date = new Date(this.airPollution.list[i].dt * 1000);
 			xArray.push(date.toJSON());
 			yArray.push(this.airPollution.list[i].components.pm2_5);
 		}
@@ -173,7 +173,7 @@
 		let data = [{
 			x: xArray,
 			y: yArray,
-			mode:"lines",
+			mode: "lines",
 			line: {
 				color: "#827397",
 			}
@@ -181,8 +181,8 @@
 
 		// Define Layout
 		var layout = {
-			xaxis: {title: "Date"},
-			yaxis: {title: "Сoncentration of PM_2.5, μg/m3"},  
+			xaxis: { title: "Date" },
+			yaxis: { title: "Сoncentration of PM_2.5, μg/m3" },
 			title: "Air Quality"
 		};
 
@@ -193,55 +193,67 @@
 </script>
 
 <!DOCTYPE html>
-	<head>
-		<title>Weather App</title>
-		<link rel="stylesheet" href="./style.css">
-		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
-	</head>
-	<body>
-		<div id="app">
-			<nav class="navbar navbar-expand-lg">
-				<div class="container">
-				  <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+
+<head>
+	<title>Weather App</title>
+	<link rel="stylesheet" href="./style.css">
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet"
+		integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+</head>
+
+<body>
+	<div id="app">
+		<nav class="navbar navbar-expand-lg">
+			<div class="container">
+				<button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+					data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false"
+					aria-label="Toggle navigation">
 					<span class="navbar-toggler-icon"></span>
-				  </button>
-				  <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+				</button>
+				<div class="collapse navbar-collapse" id="navbarNavAltMarkup">
 					<div class="navbar-nav">
 						<a class="nav-link" href="/">Weather App</a>
-					  	<a class="nav-link" href="/tripplanner.html">Trip Planner</a>
+						<a class="nav-link" href="/tripplanner.html">Trip Planner</a>
 					</div>
-				  </div>
 				</div>
-			</nav>
+			</div>
+		</nav>
 
-			<div class="main">
-				<h1>🌤 Weather App 🌤</h1>
-				<p>Simply enter the city you are planning to visit to get the weather and air pollution forecast for the next few days. From this we'll recommend what you should pack!</p>
-				
-				<input v-model="city" class="form-control" type="text" placeholder="Destination city">
-				<button v-on:click="GetData(ProcessData)" class="btn btn-secondary m-3">Submit</button>
+		<div class="main">
+			<h1>🌤 Weather App 🌤</h1>
+			<p>Simply enter the city you are planning to visit to get the weather and air pollution forecast for the
+				next few days. From this we'll recommend what you should pack!</p>
 
-				<div v-if="displayWeather" class="m-4">	
-					<daily-weather-summary :processed-weather="processedWeather"></daily-weather-summary>
-					
-					<br>
-					<br>
+			<input v-model="city" class="form-control" type="text" placeholder="Destination city">
+			<button v-on:click="GetData(ProcessData)" class="btn btn-secondary m-3">Submit</button>
 
-					<packing :four-day-average="fourDayAverage" :will-rain="willRain"></packing>
-	
-					<br>
-					<br>
+			<div v-if="displayContent" class="m-4">
+				<daily-weather-summary :processed-weather="processedWeather"></daily-weather-summary>
 
-					<air-quality-summary :average-air-quality="averageAirQuality" :mask-recommended="maskRecommended"></air-quality-summary>
-					<button v-on:click="ShowAirQualityGraph" class="btn btn-secondary">Show graph of air quality</button>
-					<div id="air-quality-graph"></div>
-	
-				</div>	
+				<br>
+				<br>
+
+				<packing :four-day-average="fourDayAverage" :will-rain="willRain"></packing>
+
+				<br>
+				<br>
+
+				<air-quality-summary :average-air-quality="averageAirQuality" :mask-recommended="maskRecommended">
+				</air-quality-summary>
+				<button v-on:click="ShowAirQualityGraph" class="btn btn-secondary">Show graph of air quality</button>
+				<div id="air-quality-graph"></div>
+
 			</div>
 		</div>
+	</div>
 
-		<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
-		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.min.js" integrity="sha384-IDwe1+LCz02ROU9k972gdyvl+AESN10+x7tBKgc9I5HFtuNz0wWnPclzo6p9vxnk" crossorigin="anonymous"></script>
-		<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-	</body>
+	<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
+		integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3"
+		crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.min.js"
+		integrity="sha384-IDwe1+LCz02ROU9k972gdyvl+AESN10+x7tBKgc9I5HFtuNz0wWnPclzo6p9vxnk"
+		crossorigin="anonymous"></script>
+	<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</body>
+
 </html>

@@ -1,155 +1,214 @@
 <script type="module">
-    import { createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js'
+  import { createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js'
 
-    createApp({
-		components: {
-		},
-        data() {
-            return {
-                location: "",
-                locationData: {},
-                lat: 0.00,
-                lon: 0.00,
-                // List of supported types: https://developers.google.com/maps/documentation/javascript/supported_types
-                type: "tourist_attraction"  // Default parameter in Google Maps
-            }
-        },
-        methods: {
-          GetLocation: getLocation,
-        }
-    }).mount('#app')
-
-    async function getLocation() {
-      console.log("getLocation called");
-      let promise = fetch("location/" + this.location);
-      let response = await promise;
-      let json = await response.json();
-      this.locationData = json;
-
-      this.lat = this.locationData.results[0].geometry.location.lat;
-      this.lon = this.locationData.results[0].geometry.location.lng;
-
-      console.log(this.locationData)
-      console.log(this.lat);
-      console.log(this.lon);
-
-      console.log(this.type);
-      initMap(this.lat, this.lon, this.type);
-	  }
-
-// Source: https://developers.google.com/maps/documentation/javascript/places
-// Source: https://developers.google.com/maps/documentation/javascript/examples/place-search-pagination
-// Source: https://developers.google.com/maps/documentation/javascript/examples/place-details
-
-function initMap(lat, lon, type) {
-  // Create the map.
-  const locationCoordinates = { lat: lat, lng: lon };
-  const map = new google.maps.Map(document.getElementById("map"), {
-    center: locationCoordinates,
-    zoom: 15,
-  });
-
-  const request = {
-    placeId: "ChIJN1t_tDeuEmsRUsoyG83frY4",
-    fields: ["name", "formatted_address", "place_id", "geometry"],
-  };
-
-  // Create the places service.
-  const infowindow = new google.maps.InfoWindow();
-  const service = new google.maps.places.PlacesService(map);
-
-  // Perform a nearby search.
-  service.nearbySearch(
-    { location: locationCoordinates, radius: 500, type: type},
-    (results, status) => {
-      if (status !== "OK" || !results) return;
-
-      addPlaces(results, map);
+  createApp({
+    components: {
+    },
+    data() {
+      return {
+        location: "",
+        locationData: {},
+        lat: 0.00,
+        lon: 0.00,
+        // List of supported types: https://developers.google.com/maps/documentation/javascript/supported_types
+        type: "tourist_attraction",  // Default parameter in Google Maps
+        displayContent: false,
+      }
+    },
+    methods: {
+      GetLocation: getLocation,
     }
-  );
-}
+  }).mount('#app')
 
-function addPlaces(places, map) {
-  for (const place of places) {
-    if (place.geometry && place.geometry.location) {
-      const image = {
-        url: place.icon,
-        size: new google.maps.Size(71, 71),
-        origin: new google.maps.Point(0, 0),
-        anchor: new google.maps.Point(17, 34),
-        scaledSize: new google.maps.Size(25, 25),
-      };
+  async function getLocation() {
+    console.log("getLocation called");
+    let promise = fetch("location/" + this.location);
+    let response = await promise;
+    let json = await response.json();
+    this.locationData = json;
 
-      new google.maps.Marker({
-        map,
-        icon: image,
-        title: place.name,
-        position: place.geometry.location,
-      });
+    this.lat = this.locationData.results[0].geometry.location.lat;
+    this.lon = this.locationData.results[0].geometry.location.lng;
+
+    console.log(this.locationData)
+    console.log(this.lat);
+    console.log(this.lon);
+
+    console.log(this.type);
+    this.displayContent = true;
+    initMap(this.lat, this.lon, this.type);
+  }
+
+  // Source: https://developers.google.com/maps/documentation/javascript/places
+  // Source: https://developers.google.com/maps/documentation/javascript/examples/place-search-pagination
+  // Source: https://developers.google.com/maps/documentation/javascript/examples/place-details
+
+  function initMap(lat, lon, type) {
+    // Create the map.
+    const locationCoordinates = { lat: lat, lng: lon };
+    const map = new google.maps.Map(document.getElementById("map"), {
+      center: locationCoordinates,
+      zoom: 15,
+    });
+
+    const request = {
+      placeId: "ChIJN1t_tDeuEmsRUsoyG83frY4",
+      fields: ["name", "formatted_address", "place_id", "geometry"],
+    };
+
+    // Create the places service.
+    const infowindow = new google.maps.InfoWindow();
+    const service = new google.maps.places.PlacesService(map);
+
+    // Perform a nearby search.
+    service.nearbySearch(
+      { location: locationCoordinates, radius: 400, type: type },
+      (results, status) => {
+        if (status !== "OK" || !results) return;
+
+        addPlaces(results, map);
+      }
+    );
+  }
+
+  function addPlaces(places, map) {
+    const placesList = document.getElementById("places");
+
+    for (const place of places) {
+      if (place.geometry && place.geometry.location) {
+        const image = {
+          url: place.icon,
+          size: new google.maps.Size(71, 71),
+          origin: new google.maps.Point(0, 0),
+          anchor: new google.maps.Point(17, 34),
+          scaledSize: new google.maps.Size(25, 25),
+        };
+
+        // Create an info window to share between markers.
+        const infoWindow = new google.maps.InfoWindow();
+
+        const marker = new google.maps.Marker({
+          map,
+          icon: image,
+          title: place.name,
+          position: place.geometry.location,
+          vicinity: place.vicinity,
+        });
+
+        // Add a click listener for each marker, and set up the info window.
+        marker.addListener("click", () => {
+          infoWindow.close();
+          infoWindow.setContent(marker.getTitle() + "<br>" + marker.vicinity);
+          infoWindow.open(marker.getMap(), marker);
+          console.log(place);
+        });
+
+        const li = document.createElement("li");
+        li.classList.add("list-group-item");
+        li.classList.add("hover");
+
+        li.textContent = place.name;
+        placesList.appendChild(li);
+        li.addEventListener("click", () => {
+          map.setCenter(place.geometry.location);
+          infoWindow.close();
+          infoWindow.setContent(marker.getTitle() + "<br>" + marker.vicinity);
+          infoWindow.open(marker.getMap(), marker);
+        });
+
+      }
     }
   }
-}
 
 // window.initMap = initMap;
 
 </script>
 
 <!DOCTYPE html>
-	<head>
-		<title>Weather App</title>
-		<link rel="stylesheet" href="./style.css">
-		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
-	</head>
-	<body>
-		<div id="app">
-			<nav class="navbar navbar-expand-lg">
-				<div class="container">
-				  <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
-					<span class="navbar-toggler-icon"></span>
-				  </button>
-				  <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-					<div class="navbar-nav">
-						<a class="nav-link" href="/">Weather App</a>
-					  	<a class="nav-link" href="/tripplanner">Trip Planner</a>
-					</div>
-				  </div>
-				</div>
-			</nav>
 
-			<div class="main">
-				<h1>🗺 Plan Your Trip! 🗺</h1>
-				<p>Now that you know what the weather will be like and what to pack, let's find out more about the city you are travelling to!</p>
-				
-				<input v-model="location" class="form-control" type="text" placeholder="Enter any location!">
-        <br>
-       
-        <label>(Optional) Select the type of place you're looking for.</label>
-        <br>
-        <br>
-        <select v-model="type" class="form-control">
-          <option>art_gallery</option>
-          <option>bus_station</option>
-          <option>cafe</option>
-          <option>museum</option>
-          <option>restaurant</option>
-          <option>store</option>
-          <option>tourist_attraction</option>
-        </select>
-        <button v-on:click="GetLocation" class="btn btn-secondary m-3">Submit</button>
-                
-        <div id="map"></div>
+<head>
+  <title>Weather App</title>
+  <link rel="stylesheet" href="./style.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+</head>
+
+<body>
+  <div id="app">
+    <nav class="navbar navbar-expand-lg">
+      <div class="container">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
+          aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+          <div class="navbar-nav">
+            <a class="nav-link" href="/">Weather App</a>
+            <a class="nav-link" href="/tripplanner.html">Trip Planner</a>
+          </div>
         </div>
-            
       </div>
-		</div>
+    </nav>
 
-        <!-- Loading Google Maps JavaScript API, source: https://developers.google.com/maps/documentation/javascript/places -->
-        <script
-            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBBtyOlxkSFua7Dx7QU04UjtPzN6_8wd0E&libraries=places" defer> 
-        </script>
+    <div class="main">
+      <h1>🗺 Plan Your Trip! 🗺</h1>
+      <p>Now that you know what the weather will be like and what to pack, let's find out more about the city you are
+        travelling to!</p>
 
-        <!-- Loading required JS for Bootstrap, source: https://getbootstrap.com/docs/5.2/getting-started/introduction/  -->
-		<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
-		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.min.js" integrity="sha384-IDwe1+LCz02ROU9k972gdyvl+AESN10+x7tBKgc9I5HFtuNz0wWnPclzo6p9vxnk" crossorigin="anonymous"></script>
-	</body>
+      <input v-model="location" class="form-control" type="text" placeholder="Enter any location!">
+      <br>
+
+      <label>(Optional) Select the type of place you're looking for.</label>
+      <br>
+      <br>
+      <select v-model="type" class="form-control">
+        <option>art_gallery</option>
+        <option>bus_station</option>
+        <option>cafe</option>
+        <option>museum</option>
+        <option>restaurant</option>
+        <option>store</option>
+        <option>tourist_attraction</option>
+      </select>
+      <button v-on:click="GetLocation" class="btn btn-secondary m-3">Submit</button>
+
+      <br>
+      <br>
+      <div v-if="displayContent" class="container">
+        <h3>What to do in {{this.locationData.results[0].formatted_address}}</h3>
+        <br>
+      </div>
+    </div>
+
+    <div class="container map-content">
+      <div class="row">
+        <div class="col-8">
+          <div id="map"></div>
+        </div>
+        <div class="col">
+          <ul class="list-group" id="places"></ul>
+        </div>
+      </div>
+    </div>
+
+
+  </div>
+
+  </div>
+  </div>
+
+  <!-- Loading Google Maps JavaScript API, source: https://developers.google.com/maps/documentation/javascript/places -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBBtyOlxkSFua7Dx7QU04UjtPzN6_8wd0E&libraries=places"
+    defer>
+    </script>
+
+  <!-- Loading required JS for Bootstrap, source: https://getbootstrap.com/docs/5.2/getting-started/introduction/  -->
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
+    integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.min.js"
+    integrity="sha384-IDwe1+LCz02ROU9k972gdyvl+AESN10+x7tBKgc9I5HFtuNz0wWnPclzo6p9vxnk"
+    crossorigin="anonymous"></script>
+</body>
+
 </html>
