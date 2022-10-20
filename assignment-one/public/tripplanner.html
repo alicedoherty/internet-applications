@@ -44,7 +44,7 @@
 
   async function getCityScores() {
     console.log("getCityScores called");
-    let promise = fetch("cityScores/" + this.location);
+    let promise = fetch("cityscores/" + this.location);
     let response = await promise;
     let json = await response.json();
     this.cityScores = json;

@@ -28,7 +28,7 @@ export default {
         </thead>
         <tbody>
             <tr v-for="day in processedWeather">
-                <td v-if="day.date==today">Today</td>
+                <td v-if="day.date===today">Today</td>
                 <td v-else>{{day.list[0].dt_txt.slice(0,10)}}</td>
                 <td>{{Math.round(day.averageTemp)}}℃</td>
                 <td>{{day.averageWind.toFixed(2)}}</td>

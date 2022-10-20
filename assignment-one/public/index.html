@@ -15,13 +15,13 @@
 				city: "",
 				weather: {},
 				processedWeather: [],
-				fourDayAverage: 0, 		// Average temperature over the next four days
-				willRain: false,		// Whether it is predicted to rain in the next four days
-				lat: 0.00,				// Latitude for inputted city
-				lon: 0.00,				// Longitude for inputted city
-				airPollution: {},		// Air pollution data for inputted city
-				averageAirQuality: 0,	// Average air quality over the next four days
-				maskRecommended: false,	// Whether a mask is recommended based on the air quality
+				fourDayAverage: 0,
+				willRain: false,
+				lat: 0.00,
+				lon: 0.00,
+				airPollution: {},
+				averageAirQuality: 0,
+				maskRecommended: false,
 				displayContent: false,
 			}
 		},
@@ -35,14 +35,14 @@
 	}).mount('#app')
 
 	async function getData() {
-		// Use of await as each function is dependent on the comepletion of the previous
+		// Using await as each function is dependent on the completion of the previous
 		await this.GetWeather();
 		await this.GetAirPollution();
 		await this.ProcessData();
 		this.ShowAirQualityGraph();
 	}
 
-	async function getWeather(processData) {
+	async function getWeather() {
 		console.log("getWeather called");
 		let promise = fetch("weather/" + this.city);
 		let response = await promise;

@@ -1,5 +1,8 @@
 "use strict";
 
+// Load API keys from .env into process.env
+require("dotenv").config();
+
 const express = require("express");
 const https = require("https");
 
@@ -10,32 +13,23 @@ const path = require("path");
 let publicPath = path.resolve(__dirname, "public");
 app.use(express.static(publicPath));
 
-app.listen(port, () => console.log(`Example app listening on port ${port}!`));
+app.listen(port, () => console.log(`Listening on port ${port}!`));
 
+// Open Weather API 5 day / 3 hour forecast data
 app.get("/weather/:city", sendWeatherData);
+
+// Open Weather API 5 day air pollution forecast data
 app.get("/airpollution/:lat/:lon", sendAirPollutionData);
 
-// Rename names
+// Google Maps Geocoding API (https://developers.google.com/maps/documentation/geocoding)
 app.get("/location/:location", sendLocationData);
 
-app.get("/cityScores/:city", sendCityScoresData);
-
-// TODO Create one function with params for the functions below
+// Teleport API Urban Area Scores (https://developers.teleport.org/api/reference/#!/urban_areas/getUrbanAreaScores)
+app.get("/cityscores/:city", sendCityScoresData);
 
 function sendWeatherData(req, res) {
   let city = req.params.city;
-
-  // Add to a private files
-  let apiKey = "4fda716a357f34ff51ad31191ff68603";
-
-  let url =
-    "https://api.openweathermap.org/data/2.5/forecast?q=" +
-    city +
-    "&appid=" +
-    apiKey +
-    "&units=metric";
-
-  console.log(url);
+  let url = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${process.env.OPEN_WEATHER_API_KEY}&units=metric`;
 
   https.get(url, (response) => {
     let weatherData = "";
@@ -44,7 +38,6 @@ function sendWeatherData(req, res) {
     });
     response.on("end", () => {
       const finalWeatherData = JSON.parse(weatherData);
-      console.log(finalWeatherData);
       res.json(finalWeatherData);
     });
   });
@@ -53,25 +46,7 @@ function sendWeatherData(req, res) {
 function sendAirPollutionData(req, res) {
   let lat = parseInt(req.params.lat);
   let lon = parseInt(req.params.lon);
-
-  if (isNaN(lat) || isNaN(lon)) {
-    res.status(400);
-    res.json({ error: "Bad Request." });
-    return;
-  }
-
-  // Add to a private files
-  let apiKey = "4fda716a357f34ff51ad31191ff68603";
-
-  let url =
-    "https://api.openweathermap.org/data/2.5/air_pollution/forecast?lat=" +
-    lat +
-    "&lon=" +
-    lon +
-    "&appid=" +
-    apiKey;
-
-  console.log(url);
+  let url = `https://api.openweathermap.org/data/2.5/air_pollution/forecast?lat=${lat}&lon=${lon}&appid=${process.env.OPEN_WEATHER_API_KEY}`;
 
   https.get(url, (response) => {
     let airPollutionData = "";
@@ -88,18 +63,8 @@ function sendAirPollutionData(req, res) {
 function sendLocationData(req, res) {
   let location = req.params.location;
 
-  // Add to a private files
-  let apiKey = "AIzaSyBBtyOlxkSFua7Dx7QU04UjtPzN6_8wd0E";
+  let url = `https://maps.googleapis.com/maps/api/geocode/json?address=${location}&key=${process.env.GOOGLE_MAPS_API_KEY}`;
 
-  let url =
-    "https://maps.googleapis.com/maps/api/geocode/json?address=" +
-    location +
-    "&key=" +
-    apiKey;
-
-  console.log(url);
-
-  // Check resources and see if it's necessary to do the += thing
   https.get(url, (response) => {
     let locationData = "";
     response.on("data", (data) => {
@@ -115,11 +80,7 @@ function sendLocationData(req, res) {
 
 function sendCityScoresData(req, res) {
   let city = req.params.city;
-
-  let url =
-    "https://api.teleport.org/api/urban_areas/slug:" + city + "/scores/";
-
-  console.log(url);
+  let url = `https://api.teleport.org/api/urban_areas/slug:${city}/scores/`;
 
   https.get(url, (response) => {
     let cityScoresData = "";
@@ -128,7 +89,6 @@ function sendCityScoresData(req, res) {
     });
     response.on("end", () => {
       const finalCityScoresData = JSON.parse(cityScoresData);
-      console.log(finalCityScoresData);
       res.json(finalCityScoresData);
     });
   });
