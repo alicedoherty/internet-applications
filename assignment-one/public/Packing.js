@@ -5,13 +5,13 @@ export default {
   },
   template: `
     <h3>Packing Recommendations</h3>
-    <p v-if="willRain===true">It is predicted to rain over the next four days. <i>Pack an umbrella!</i> ☔️</p>
-    <p v-else>It is not predicted to rain over the next four days. <i>You don't need to bring an umbrella!</i> 😎</p>
+    <p v-if="willRain===true">It is predicted to rain over the next four days. <b>Pack an umbrella!</b> ☔️</p>
+    <p v-else>It is not predicted to rain over the next four days. <b>You don't need to bring an umbrella!</b> 😎</p>
 
     <p>The average temperature over the next four days is {{Math.round(fourDayAverage)}}℃.</p>
     
     <div v-if="fourDayAverage<12">
-        <p>You need to pack for <i>cold weather</i>. Here are some suggestions!</p>
+        <p>You need to pack for <b>cold weather</b>. Here are some suggestions!</p>
         <ul class="list-group">
             <li class="list-group-item">🧥 Coat</li>
             <li class="list-group-item">🧤 Gloves</li>
@@ -21,7 +21,7 @@ export default {
     </div>
 
     <div v-if="fourDayAverage>=12 && fourDayAverage<=24">
-        <p>You need to pack for <i>mild weather</i>. Here are some suggestions!</p>
+        <p>You need to pack for <b>mild weather</b>. Here are some suggestions!</p>
         <ul class="list-group">
             <li class="list-group-item">🧥 Jacket</li>
             <li class="list-group-item">👕 T-shirts</li>
@@ -31,7 +31,7 @@ export default {
     </div>
 
     <div v-if="fourDayAverage>24">
-        <p>You need to pack for <i>hot weather</i>. Here are some suggestions!</p>
+        <p>You need to pack for <b>hot weather</b>. Here are some suggestions!</p>
         <ul class="list-group">
             <li class="list-group-item">😎 Sunglasses</li>
             <li class="list-group-item">🧢 Cap</li>

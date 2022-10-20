@@ -6,7 +6,7 @@ export default {
   template: `
     <h3>Air Quality</h3>
     <p>The average concentration of PM<sub>2.5</sub> for the next five days is {{averageAirQuality.toFixed(2)}} μg/m<sup>3</sup>.</p>
-    <p v-if="maskRecommended===true">The concentration of PM<sub>2.5</sub> will reach over 10μg/m<sup>3</sup> in the next five days, so <i>bring a mask!</i> 😷</p>
-    <p v-else>The concentration of PM<sub>2.5</sub> will not reach over 10μg/m<sup>3</sup> in the next five days, so you <i>don't need to bring a mask!</i> 🌱</p>
+    <p v-if="maskRecommended===true">The concentration of PM<sub>2.5</sub> will reach over 10μg/m<sup>3</sup> in the next five days, so <b>bring a mask!</b> 😷</p>
+    <p v-else>The concentration of PM<sub>2.5</sub> will not reach over 10μg/m<sup>3</sup> in the next five days, so you <b>don't need to bring a mask!</b> 🌱</p>
   `,
 };

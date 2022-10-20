@@ -1,187 +1,197 @@
 <script type="module">
-  import { createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js'
-  // Function used to display map and places of interest
-  import { initMap } from './maps.js'
+    import { createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js'
+    // Function used to display map and places of interest
+    import { initMap } from './maps.js'
 
-  createApp({
-    components: {
+    createApp({
+        components: {
 
-    },
-    data() {
-      return {
-        location: "",
-        locationData: {},
-        lat: 0.00,
-        lon: 0.00,
-        type: "tourist_attraction",
-        cityScores: {},
-        displayContent: false,
-      }
-    },
-    methods: {
-      GetData: getData,
-      GetLocation: getLocation,
-      GetCityScores: getCityScores,
-      ShowCityScoresGraph: showCityScoresGraph
+        },
+        data() {
+            return {
+                location: "",
+                locationData: {},
+                lat: 0.00,
+                lon: 0.00,
+                type: "tourist_attraction",
+                cityScores: {},
+                displayContent: false,
+            }
+        },
+        methods: {
+            GetData: getData,
+            GetLocation: getLocation,
+            GetCityScores: getCityScores,
+            ShowCityScoresGraph: showCityScoresGraph
+        }
+    }).mount('#app')
+
+    async function getData() {
+        // Using await as each function is dependent on the completion of the previous
+        try {
+            await this.GetLocation();
+        } catch (e) {
+            console.log(e);
+            window.alert("🫤 That's not a valid city, please enter another one!");
+        }
+
+        try {
+            await this.GetCityScores();
+            await this.ShowCityScoresGraph();
+        } catch (e) {
+            console.log(e);
+            document.querySelector(".city-summary").innerHTML = "There's no data for this city or its scores yet in the Teleport database 🫤"
+        }
+
+        initMap(this.lat, this.lon, this.type);
     }
-  }).mount('#app')
 
-  async function getData() {
-    // Using await as each function is dependent on the completion of the previous
-    await this.GetLocation();
-    await this.GetCityScores();
-    await this.ShowCityScoresGraph();
-    initMap(this.lat, this.lon, this.type);
-  }
+    // Using the Google Maps Geocoding API to get information about the inputted location
+    async function getLocation() {
+        console.log("getLocation called");
+        let promise = fetch("location/" + this.location);
+        let response = await promise;
+        let json = await response.json();
+        this.locationData = json;
+        console.log(this.locationData);
 
-  // Using the Google Maps Geocoding API to get information about the inputted location
-  async function getLocation() {
-    console.log("getLocation called");
-    let promise = fetch("location/" + this.location);
-    let response = await promise;
-    let json = await response.json();
-    this.locationData = json;
-    console.log(this.locationData);
+        this.lat = this.locationData.results[0].geometry.location.lat;
+        this.lon = this.locationData.results[0].geometry.location.lng;
 
-    this.lat = this.locationData.results[0].geometry.location.lat;
-    this.lon = this.locationData.results[0].geometry.location.lng;
-  }
+        this.displayContent = true;
+    }
 
-  // Using Teleport API to get their Urban Area Scores
-  async function getCityScores() {
-    console.log("getCityScores called");
-    let promise = fetch("cityscores/" + this.location);
-    let response = await promise;
-    let json = await response.json();
-    this.cityScores = json;
-    console.log(this.cityScores);
+    // Using Teleport API to get their Urban Area Scores
+    async function getCityScores() {
+        console.log("getCityScores called");
+        let promise = fetch("cityscores/" + this.location);
+        let response = await promise;
+        let json = await response.json();
+        this.cityScores = json;
+        console.log(this.cityScores);
+    }
 
-    this.displayContent = true;
-  }
+    async function showCityScoresGraph() {
+        console.log("showCityScoresGraph called")
 
-  async function showCityScoresGraph() {
-    console.log("showCityScoresGraph called")
+        var data = [{
+            type: 'bar',
+            x: [this.cityScores.categories[1].score_out_of_10, this.cityScores.categories[7].score_out_of_10, this.cityScores.categories[13].score_out_of_10, this.cityScores.categories[14].score_out_of_10, this.cityScores.categories[16].score_out_of_10],
+            y: ["Cost of Living", "Safety", "Internet Access", "Leisure & Culture", "Outdoors"],
+            orientation: 'h',
+            marker: {
+                color: ['#c6dbda', '#fee1e8', '#fed7c3', '#f6eac2', '#ecd5e3']
+            },
+        }]
 
-    var data = [{
-      type: 'bar',
-      x: [this.cityScores.categories[1].score_out_of_10, this.cityScores.categories[7].score_out_of_10, this.cityScores.categories[13].score_out_of_10, this.cityScores.categories[14].score_out_of_10, this.cityScores.categories[16].score_out_of_10],
-      y: ["Cost of Living", "Safety", "Internet Access", "Leisure & Culture", "Outdoors"],
-      orientation: 'h',
-      marker: {
-        color: ['#c6dbda', '#fee1e8', '#fed7c3', '#f6eac2', '#ecd5e3']
-      },
-    }]
+        var layout = {
+            xaxis: { title: "Score (out of 10)" },
+            yaxis: { automargin: true },
+            title: "City Scores"
+        };
 
-    var layout = {
-      xaxis: { title: "Score (out of 10)" },
-      yaxis: { automargin: true },
-      title: "City Scores"
-    };
+        document.querySelector(".city-summary").innerHTML = this.cityScores.summary;
 
-    var summary = document.querySelector(".city-summary");
-    summary.innerHTML = this.cityScores.summary;
-
-    var div = document.querySelector(".city-scores-graph")
-    Plotly.newPlot(div, data, layout);
-  }
+        var graphDiv = document.querySelector(".city-scores-graph");
+        Plotly.newPlot(graphDiv, data, layout);
+    }
 
 </script>
 
 <!DOCTYPE html>
 
 <head>
-  <title>Weather App</title>
-  <link rel="stylesheet" href="./style.css">
-  <!-- Link to Bootstrap's CSS, used for basic styling. Source: https://getbootstrap.com/docs/5.2 -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+    <title>Weather App</title>
+    <link rel="stylesheet" href="./style.css">
+    <!-- Link to Bootstrap's CSS, used for basic styling. Source: https://getbootstrap.com/docs/5.2 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
 </head>
 
 <body>
-  <div id="app">
+    <div id="app">
 
-    <nav class="navbar navbar-expand-lg">
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
-        aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-        <div class="navbar-nav">
-          <a class="nav-link" href="/">Weather App</a>
-          <a class="nav-link" href="/tripplanner.html">Trip Planner</a>
+        <nav class="navbar navbar-expand-lg">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
+                aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+                <div class="navbar-nav">
+                    <a class="nav-link" href="/">Weather App</a>
+                    <a class="nav-link" href="/tripplanner.html">Trip Planner</a>
+                </div>
+            </div>
+        </nav>
+
+        <div class="main">
+            <h1>🗺 Plan Your Trip! 🗺</h1>
+            <p>Now that you know what the weather will be like and what to pack, let's find out more about the city you
+                are
+                travelling to!</p>
+
+            <input v-model="location" class="form-control m-3" type="text"
+                placeholder="Enter the city you're travelling to!">
+
+            <label>(Optional) Select the type of places you're interested in.</label>
+
+            <!-- List of supported types: https://developers.google.com/maps/documentation/javascript/supported_types -->
+            <select v-model="type" class="form-control m-3">
+                <option>art_gallery</option>
+                <option>bus_station</option>
+                <option>cafe</option>
+                <option>museum</option>
+                <option>restaurant</option>
+                <option>store</option>
+                <option>tourist_attraction</option>
+            </select>
+
+            <button v-on:click="GetData" class="btn btn-secondary m-3">Submit</button>
         </div>
-      </div>
-    </nav>
 
-    <div class="main">
-      <h1>🗺 Plan Your Trip! 🗺</h1>
-      <p>Now that you know what the weather will be like and what to pack, let's find out more about the city you are
-        travelling to!</p>
+        <div v-if="displayContent" class="center">
 
-      <input v-model="location" class="form-control m-3" type="text" placeholder="Enter the city you're travelling to!">
+            <!-- Map of inputted location with points of interest highlighted (Google Maps API) -->
+            <div class="container">
+                <h3>Things To Do In {{this.locationData.results[0].formatted_address}}!</h3>
+                <br>
 
-      <label>(Optional) Select the type of places you're interested in.</label>
+                <div class="row">
+                    <div class="col-8">
+                        <div id="map"></div>
+                    </div>
 
-      <!-- List of supported types: https://developers.google.com/maps/documentation/javascript/supported_types -->
-      <select v-model="type" class="form-control m-3">
-        <option>art_gallery</option>
-        <option>bus_station</option>
-        <option>cafe</option>
-        <option>museum</option>
-        <option>restaurant</option>
-        <option>store</option>
-        <option>tourist_attraction</option>
-      </select>
+                    <div class="col">
+                        <ul class="list-group" id="places"></ul>
+                    </div>
+                </div>
+            </div>
 
-      <button v-on:click="GetData" class="btn btn-secondary m-3">Submit</button>
+            <!-- Summary of inputted location and its city scores (Teleport API) -->
+            <div class="container">
+                <h3>Get to Know {{this.locationData.results[0].formatted_address}} Better!</h3>
+                <br>
+
+                <p class="city-summary"></p>
+                <p><i>Summary is courtesy of <a href="https://teleport.org/cities/">Teleport</a>.</i></p>
+                <div class="city-scores-graph"></div>
+            </div>
+
+        </div>
+
     </div>
 
-    <div v-if="displayContent" class="center">
+    <!-- Loading Google Maps JavaScript API, source: https://developers.google.com/maps/documentation/javascript/places -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBBtyOlxkSFua7Dx7QU04UjtPzN6_8wd0E&libraries=places"
+        defer></script>
 
-      <!-- Map of inputted location with points of interest highlighted (Google Maps API) -->
-      <div class="container m-4">
-        <h3>Things To Do In {{this.locationData.results[0].formatted_address}}!</h3>
-        <br>
+    <!-- Link to Bootstrap's JS, used for basic styling. Source: https://getbootstrap.com/docs/5.2 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3"
+        crossorigin="anonymous"></script>
 
-        <div class="row">
-          <div class="col-8">
-            <div id="map"></div>
-          </div>
-
-          <div class="col">
-            <ul class="list-group" id="places"></ul>
-          </div>
-        </div>
-      </div>
-
-      <!-- Summary of inputted location and its city scores (Teleport API) -->
-      <div class="container m-4">
-        <br>
-        <h3>Get to Know {{this.locationData.results[0].formatted_address}} Better!</h3>
-        <br>
-
-        <p class="city-summary"></p>
-        <div class="city-scores-graph"></div>
-      </div>
-
-    </div>
-
-  </div>
-
-  <!-- Loading Google Maps JavaScript API, source: https://developers.google.com/maps/documentation/javascript/places -->
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBBtyOlxkSFua7Dx7QU04UjtPzN6_8wd0E&libraries=places"
-    defer>
-    </script>
-
-  <!-- Loading required JS for Bootstrap, source: https://getbootstrap.com/docs/5.2/getting-started/introduction/  -->
-  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
-    integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3"
-    crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.min.js"
-    integrity="sha384-IDwe1+LCz02ROU9k972gdyvl+AESN10+x7tBKgc9I5HFtuNz0wWnPclzo6p9vxnk"
-    crossorigin="anonymous"></script>
-  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-
+    <!-- Link to plotly.js CDN used for graphs -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </body>
 
 </html>

@@ -25,6 +25,7 @@ export function initMap(lat, lon, type) {
 
 function addPlaces(places, map) {
   const placesList = document.getElementById("places");
+  placesList.innerHTML = "";
 
   for (const place of places) {
     if (place.geometry && place.geometry.location) {
