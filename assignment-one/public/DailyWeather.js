@@ -15,8 +15,11 @@ export default {
   template: `
     <h3>4 Day Weather Forecast</h3>
     <p>Below is a summary of the weather forecast for the next four days. Each value represents the average of all datapoints from that day.</p>
+    
     <hourly-weather :processed-weather="processedWeather"></hourly-weather>
+    
     <br>
+    
     <table class="table table-bordered table-hover">
         <thead>
             <tr>
@@ -35,6 +38,6 @@ export default {
                 <td>{{day.averageRain.toFixed(2)}}</td>
             </tr>
         </tbody>
-      </table>
+    </table>
     `,
 };

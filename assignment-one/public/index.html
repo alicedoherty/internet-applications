@@ -39,7 +39,7 @@
 		await this.GetWeather();
 		await this.GetAirPollution();
 		await this.ProcessData();
-		this.ShowAirQualityGraph();
+		await this.ShowAirQualityGraph();
 	}
 
 	async function getWeather() {
@@ -158,7 +158,7 @@
 
 		this.averageAirQuality = totalPm2_5 / this.airPollution.list.length;
 
-		// Display weather and air pollution data
+		// Display the weather and air pollution data
 		this.displayContent = true;
 	}
 

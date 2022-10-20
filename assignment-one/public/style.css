@@ -5,6 +5,12 @@
     text-align: center;
 }
 
+.center {
+    max-width: 80%;
+    margin: auto;
+    text-align: center;
+}
+
 .navbar-nav, .navbar-toggler {
     margin-top: 15px !important;
     margin: auto;
@@ -17,12 +23,12 @@ button {
 #map {
     flex-basis: 0;
     flex-grow: 4;
-    height: 80%;
+    height: 100%;
 }
 
-.row {
-    height: 80%;
-}
+/* .row {
+    height: 70%;
+} */
 
 .hover:hover {
     cursor: grab;

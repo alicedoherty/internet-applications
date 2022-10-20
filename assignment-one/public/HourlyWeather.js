@@ -48,6 +48,7 @@ export default {
                     <br>
                 </tbody>
               </table>
+
             </div>
           </div>
         </div>
