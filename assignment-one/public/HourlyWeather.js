@@ -43,7 +43,7 @@ export default {
                         <td>{{Math.round(item.main.temp)}}℃</td>
                         <td>{{item.wind.speed.toFixed(2)}}</td>
                         <td v-if="item.hasOwnProperty('rain') === true">{{item.rain["3h"]}}</td>
-                        <td v-else>0</td>
+                        <td v-else>0.00</td>
                     </tr>
                     <br>
                 </tbody>

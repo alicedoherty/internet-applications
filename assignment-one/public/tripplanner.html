@@ -4,9 +4,6 @@
     import { initMap } from './maps.js'
 
     createApp({
-        components: {
-
-        },
         data() {
             return {
                 location: "",
@@ -27,31 +24,34 @@
     }).mount('#app')
 
     async function getData() {
-        // Using await as each function is dependent on the completion of the previous
         try {
             await this.GetLocation();
+            initMap(this.lat, this.lon, this.type);
         } catch (e) {
             console.log(e);
             window.alert("🫤 That's not a valid city, please enter another one!");
         }
 
+        // Teleport API doesn't have Urban Area Scores for all cities (https://teleport.org/cities/)
+        // If the input is a valid city, but there are no scores for that city, display the message below instead
         try {
             await this.GetCityScores();
             await this.ShowCityScoresGraph();
         } catch (e) {
             console.log(e);
             document.querySelector(".city-summary").innerHTML = "There's no data for this city or its scores yet in the Teleport database 🫤"
+            document.querySelector(".city-scores-graph").style.display = "none";
         }
-
-        initMap(this.lat, this.lon, this.type);
     }
 
     // Using the Google Maps Geocoding API to get information about the inputted location
     async function getLocation() {
         console.log("getLocation called");
+
         let promise = fetch("location/" + this.location);
         let response = await promise;
         let json = await response.json();
+
         this.locationData = json;
         console.log(this.locationData);
 
@@ -64,9 +64,11 @@
     // Using Teleport API to get their Urban Area Scores
     async function getCityScores() {
         console.log("getCityScores called");
+
         let promise = fetch("cityscores/" + this.location);
         let response = await promise;
         let json = await response.json();
+
         this.cityScores = json;
         console.log(this.cityScores);
     }
@@ -118,7 +120,9 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
                 <div class="navbar-nav">
+                    <!-- Core Requirements -->
                     <a class="nav-link" href="/">Weather App</a>
+                    <!-- "Innovative Feature" -->
                     <a class="nav-link" href="/tripplanner.html">Trip Planner</a>
                 </div>
             </div>
@@ -127,13 +131,12 @@
         <div class="main">
             <h1>🗺 Plan Your Trip! 🗺</h1>
             <p>Now that you know what the weather will be like and what to pack, let's find out more about the city you
-                are
-                travelling to!</p>
+                are travelling to!</p>
 
             <input v-model="location" class="form-control m-3" type="text"
                 placeholder="Enter the city you're travelling to!">
 
-            <label>(Optional) Select the type of places you're interested in.</label>
+            <label>(Optional) Select the type of places you're interested in visiting.</label>
 
             <!-- List of supported types: https://developers.google.com/maps/documentation/javascript/supported_types -->
             <select v-model="type" class="form-control m-3">
@@ -151,7 +154,7 @@
 
         <div v-if="displayContent" class="center">
 
-            <!-- Map of inputted location with points of interest highlighted (Google Maps API) -->
+            <!-- Map of inputted location with points of interest highlighted (Google Maps JavaScript API & Geocoding API) -->
             <div class="container">
                 <h3>Things To Do In {{this.locationData.results[0].formatted_address}}!</h3>
                 <br>
