@@ -74,6 +74,8 @@
     }
 
     /*
+        Data is processed/manipulated on the client-side to conform more closely to RESTful style.
+
         Process the weather and air pollution data so it is more usable.
         - processedWeather: For each day, calculate the average temperature, wind speed, and rainfall (for summary table)
         - fourDayAverage: Calculate the average temperature over the next four days (for indicating what type of weather to pack for)
@@ -198,6 +200,7 @@
 </script>
 
 <!DOCTYPE html>
+<html>
 
 <head>
     <title>Weather App</title>
@@ -236,16 +239,19 @@
             <div v-if="displayContent">
                 <br>
 
+                <!-- Packing.js component (summary of what to pack based on weather forecast) -->
                 <packing :four-day-average="fourDayAverage" :will-rain="willRain"></packing>
 
                 <br>
                 <br>
 
+                <!-- DailyWeather.js component (4 day forecast summary table) -->
                 <daily-weather :processed-weather="processedWeather"></daily-weather>
 
                 <br>
                 <br>
 
+                <!-- AirQuality.js component (air pollution summary) -->
                 <air-quality :average-air-quality="averageAirQuality" :mask-recommended="maskRecommended"></air-quality>
                 <div id="air-quality-graph"></div>
 

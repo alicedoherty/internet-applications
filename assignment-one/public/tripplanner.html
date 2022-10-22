@@ -61,7 +61,7 @@
         this.displayContent = true;
     }
 
-    // Using Teleport API to get their Urban Area Scores
+    // Using Teleport API to get inputted city's Urban Area Score
     async function getCityScores() {
         console.log("getCityScores called");
 
@@ -101,6 +101,7 @@
 </script>
 
 <!DOCTYPE html>
+<html>
 
 <head>
     <title>Weather App</title>
@@ -170,7 +171,7 @@
                 </div>
             </div>
 
-            <!-- Summary of inputted location and its city scores (Teleport API) -->
+            <!-- Summary of inputted location and its Urban Area Scores (Teleport API) -->
             <div class="container">
                 <h3>Get to Know {{this.locationData.results[0].formatted_address}} Better!</h3>
                 <br>
@@ -193,7 +194,7 @@
         integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3"
         crossorigin="anonymous"></script>
 
-    <!-- Link to plotly.js CDN used for graphs -->
+    <!-- Link to plotly.js CDN used for graphs. Source: https://plotly.com/javascript/ -->
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </body>
 
