@@ -79,9 +79,9 @@
         Process the weather and air pollution data so it is more usable.
         - processedWeather: For each day, calculate the average temperature, wind speed, and rainfall (for summary table)
         - fourDayAverage: Calculate the average temperature over the next four days (for indicating what type of weather to pack for)
-        - willRain: Whether it is predicted to rain in the next four days (for indicating whether to bring an umbrella)
+        - willRain: Whether it is predicted to rain any time in the next four days (for indicating whether to bring an umbrella)
         - averageAirQuality: Calculate the average PM_2.5 for the next 5 days
-        - maskRecommended: Whether PM_2.5 is predicted to reach over 10μg/m3 in the next 5 days (for indicating whether to bring a mask)
+        - maskRecommended: Whether PM_2.5 is predicted to reach over 10μg/m3 any time in the next 5 days (for indicating whether to bring a mask)
 
         processedWeather: [
             {
@@ -152,7 +152,7 @@
 
         this.fourDayAverage = totalTemp / this.processedWeather.length;
 
-        // Calculate average PM_2.5 for the next 5 days and whether PM_2.5 will reach over 10μg/m3
+        // Calculate average PM_2.5 for the next 5 days and whether PM_2.5 will reach over 10μg/m3 at any stage over the next five days
         let totalPm2_5 = 0;
 
         for (let i = 0; i < this.airPollution.list.length; i++) {
