@@ -1,0 +1,26 @@
+<!-- Part 1A -->
+<h1>TPart 1A</h1>
+
+<script>
+    "use strict";
+    let i = 25;
+    while (i >= 0) {
+        console.log("i = " + i);
+        i = i - 5;
+    }
+</script>
+
+<!-- Part 1B -->
+
+<h1>Part 1B</h1>
+
+<div id="target"></div>
+
+<script>
+    i = 25;
+    while (i >= 0) {
+        console.log("i = " + i);
+        document.getElementById("target").textContent += (' ' + i.toString());
+        i = i - 5;
+    }
+</script>
